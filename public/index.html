@@ -14,7 +14,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<meta name="version" content="2026-11-25.9">
+<meta name="version" content="2026-11-25.10">
 <title>Weekly Reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -56,7 +56,7 @@ button,input,textarea{font:inherit;color:inherit}
 .lang:hover{color:var(--ink)}
 .tabs{display:flex;gap:16px;overflow-x:auto;padding:10px 20px 4px;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
-.tabs:empty,.prog:has(.bars:empty){display:none}
+.tabs:empty{display:none}
 .tab{flex:none;height:30px;padding:0;border:0;background:none;color:var(--dim);font-size:13px;cursor:pointer;white-space:nowrap}
 .tab.on{color:var(--ink);font-weight:600}
 .prog{display:flex;align-items:center;gap:12px;padding-block:8px 4px}
@@ -155,6 +155,8 @@ footer .btn{height:40px}
 .deck{grid-row:2}.bar{grid-row:3}
 .app{padding-top:0}
 #pos{display:none}
+#date{flex:none;font-size:12px;font-weight:600;color:var(--sub);font-variant-numeric:tabular-nums}
+#date:empty{display:none}
 .page{padding-top:12px;padding-bottom:12px}
 .bar{display:flex;align-items:center;gap:2px;padding-block:4px calc(4px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
 .bar .sp{flex:1}
@@ -174,7 +176,7 @@ footer .btn{height:40px}
 <body>
 <div class="app">
   <nav class="tabs" id="tabs" aria-label="セクション"></nav>
-  <div class="prog wrap"><div class="bars" id="bars"></div><span id="pos">–</span></div>
+  <div class="prog wrap"><div class="bars" id="bars"></div><span id="pos">–</span><time id="date"></time></div>
   <main class="deck" id="deck"><div class="page"><div class="state">読み込み中…</div></div></main>
   <nav class="bar wrap" aria-label="操作">
     <details class="lp"><summary class="btn lsel" aria-label="言語を選ぶ"><span id="lmono">JS</span><span id="num">#—</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></summary><div class="lmenu" id="langs" role="group" aria-label="言語"></div></details>
@@ -189,7 +191,7 @@ footer .btn{height:40px}
     <details class="sd">
       <summary class="btn ic" aria-label="設定"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></summary>
       <div class="set">
-        <h1><span id="lname">JavaScript Weekly</span><small id="date">読み込み中…</small></h1>
+        <h1><span id="lname">JavaScript Weekly</span></h1>
         <button class="btn thm" id="theme" aria-label="ライト/ダーク切替"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="th-moon" d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/><g class="th-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg><span>ライト / ダーク</span></button>
         <label for="jump">号へ移動</label>
         <div class="row"><input id="jump" inputmode="numeric" placeholder="号数で移動"><button class="btn" id="latest">最新</button></div>
@@ -199,7 +201,7 @@ footer .btn{height:40px}
         <div id="trInfo">翻訳エンジン: 確認中</div>
         <label for="px">CORSプロキシ（{url} に記事URL。改行で複数、上から順に試行）</label>
         <textarea id="px" rows="4"></textarea>
-        <p style="font-size:12px">バージョン 2026-11-25.9</p>
+        <p style="font-size:12px">バージョン 2026-11-25.10</p>
         <p>キー操作：Space 再生／← → セクション／[ ] 号／T 翻訳。カードを押している間は一時停止。</p>
       </div>
     </details>
@@ -482,10 +484,17 @@ function card(it){
   const img = it.img ? '<img class="th" src="' + esc(it.img) + '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">' : '';
   return '<article class="it' + (it.img ? ' has-img' : '') + '">' + img + link + desc + meta + '</article>';
 }
+// 日付は 2026.11.21 の形にそろえる
+function fmtDate(d){
+  if (!d) return '';
+  const t = new Date(/^\d{4}-\d{2}-\d{2}$/.test(d) ? d + 'T00:00:00' : d);
+  if (isNaN(t)) return d;
+  return t.getFullYear() + '.' + String(t.getMonth() + 1).padStart(2, '0') + '.' + String(t.getDate()).padStart(2, '0');
+}
 // 画面に収まるだけ記事を詰めてページを作る（収まらない1件は単独ページ）
 function render(keep){
   const s = data.sections, deck = $('#deck'), pages = [], first = [], tpl = document.createElement('template');
-  $('#date').textContent = data.date || ' ';
+  $('#date').textContent = fmtDate(data.date);
   $('#tabs').innerHTML = s.map((x, i) => '<button class="tab" data-i="' + i + '">' + esc(x.name) + '</button>').join('');
   deck.innerHTML = '';
   s.forEach((x, si) => {
@@ -553,7 +562,7 @@ async function load(n){
   const prev = data && issue ? {issue, data, cur, lang} : null; // 新しい号が無かったときに戻すため
   data = null;
   $('#jump').value = '';
-  $('#date').textContent = '読み込み中…';
+  $('#date').textContent = '';
   const cached = n ? store.get('jsw-' + lang + '-' + n, null) : null;
   if (n){ issue = n; setHead(); }
   stateMsg((n ? '#' + n : '最新号') + ' を読み込み中…');
@@ -594,7 +603,7 @@ async function load(n){
       return;
     }
     if (!n){ issue = store.get('jsw-last-' + lang, 0); setHead(); }
-    $('#date').textContent = ' ';
+    $('#date').textContent = '';
     if (e.nf) stateMsg('#' + n + ' はまだ公開されていません（最新号まで読み終わりました）。');
     else showFallback(n, e.message);
   }
