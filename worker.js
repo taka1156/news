@@ -21,6 +21,7 @@ export default {
         'cache-control': 'public, max-age=600',
         'access-control-allow-origin': '*',
         'x-weekly-proxy': '1',
+        'x-final-url': r.url,
       },
     });
   },

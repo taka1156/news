@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="version" content="2026-11-25.1">
+<meta name="version" content="2026-11-25.2">
 <title>Weekly Reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&family=M+PLUS+Rounded+1c:wght@500;700&display=swap" rel="stylesheet">
@@ -76,6 +76,7 @@ button,input,textarea{font:inherit;color:inherit}
 .page.fb{display:flex;flex-direction:column;gap:10px;overflow:hidden;padding-top:4px;padding-bottom:12px}
 .fbcard{align-self:center;margin:auto 0;display:flex;align-items:center;gap:8px;background:var(--card);border-radius:18px;box-shadow:var(--clay-s);padding:8px 8px 8px 16px;font-size:13px;font-weight:700;color:var(--dim);max-width:100%}
 .fbcard span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fbcard small{display:block;font-size:11px;font-weight:500;overflow:hidden;text-overflow:ellipsis}
 .fbbar{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--dim)}
 .fbbar span{flex:1;text-align:left;padding-left:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fb .btn.sm{height:34px;min-width:34px;width:34px;padding:0;border-radius:12px;text-decoration:none}
@@ -125,7 +126,7 @@ summary{list-style:none}summary::-webkit-details-marker{display:none}
         <div id="trInfo">翻訳エンジン: 確認中</div>
         <label for="px">CORSプロキシ（{url} に記事URL。改行で複数、上から順に試行）</label>
         <textarea id="px" rows="4"></textarea>
-        <p style="font-size:12px">バージョン 2026-11-25.1</p>
+        <p style="font-size:12px">バージョン 2026-11-25.2</p>
         <p>キー操作：Space 再生／← → セクション／[ ] 号／T 翻訳。カードを押している間は一時停止。</p>
       </div>
     </details>
@@ -168,6 +169,7 @@ let issue = 0, data = null, cur = 0, translating = store.get('jsw-tr', false), t
 const trCache = store.get('jsw-trcache', {});
 
 /* ---------- 取得 ---------- */
+let lastFinal = '';
 // プロキシを並列に試し、最初に成功したものを使う（各15秒でタイムアウト）
 async function fetchHTML(url){
   const ctrls = [];
@@ -181,7 +183,7 @@ async function fetchHTML(url){
       if (!r.ok) throw new Error('HTTP ' + r.status);
       const t = await r.text();
       if (t.length < 500) throw new Error('空のレスポンス');
-      return t;
+      return {t, final: r.headers.get('x-final-url') || ''};
     }catch(e){
       throw e.name === 'AbortError' ? new Error('タイムアウト') : e.nf ? e : new Error(e.message === 'Failed to fetch' ? '接続できません' : e.message);
     }finally{ clearTimeout(to); }
@@ -189,9 +191,10 @@ async function fetchHTML(url){
   const list = (OWN ? [OWN] : []).concat(proxies);
   if (!list.length) throw new Error('プロキシ未設定');
   try{
-    const t = await Promise.any(list.map(one));
+    const res = await Promise.any(list.map(one));
     ctrls.forEach(c => c.abort());
-    return t;
+    lastFinal = res.final;
+    return res.t;
   }catch(agg){
     const errs = agg.errors || [agg];
     const nf = errs.find(e => e.nf);
@@ -238,13 +241,17 @@ function linesOf(el){
 }
 function parse(html, kind){
   const doc = new DOMParser().parseFromString(html, 'text/html');
+  { // 号数などに混ざるゼロ幅文字（&#8203; など）を除去
+    const tw = doc.createTreeWalker(doc.documentElement, NodeFilter.SHOW_TEXT);
+    for (let t; t = tw.nextNode();) if (/[\u200B-\u200D\u2060\uFEFF]/.test(t.nodeValue)) t.nodeValue = t.nodeValue.replace(/[\u200B-\u200D\u2060\uFEFF]/g, '');
+  }
   const root = kind === 'cooper' ? (doc.querySelector('.issue-html, #content, .issue, main') || doc.body)
              : kind === 'twir' ? (doc.querySelector('.post-content, article, main') || doc.body) : doc.body;
   const text = root.textContent;
   const dm = text.match(new RegExp('(' + MONTHS + ')\\s+\\d{1,2},\\s+\\d{4}', 'i'));
   const date = dm ? dm[0].toLowerCase().replace(/^\w/, c => c.toUpperCase()) : '';
   const nm = kind === 'twir' ? (doc.title + ' ' + text).match(/This Week in Rust (\d{2,4})/i)
-           : text.match(new RegExp('#(\\d{2,4})\\s*[—–-]\\s*(' + MONTHS + ')', 'i'));
+           : (text.match(new RegExp('#\\s*(\\d{2,4})\\s*[—–-]\\s*(' + MONTHS + ')', 'i')) || text.match(/Issue\s+\d+\s*#\s*(\d{2,4})/i));
   const sections = [{name:'トップ', items:[]}];
   const taken = new Set();
   const inTaken = el => { for (let p = el.parentElement; p; p = p.parentElement) if (taken.has(p)) return true; return false; };
@@ -255,7 +262,7 @@ function parse(html, kind){
   if (kind === 'cooper'){
     walk(el => {
       const c = (el.className || '') + '', t = el.textContent.trim();
-      if (t && t.length <= 60 && !el.querySelector('a[href*="/link/"]') && (/heading|el-splitbar/i.test(c) || /^H[2-4]$/.test(el.tagName))){ head(headName(t)); taken.add(el); return; }
+      if (t && t.length <= 60 && !el.querySelector('a[href]') && (/heading|el-splitbar/i.test(c) || /^(H[2-4]|TH)$/.test(el.tagName) || (/^(P|TD|STRONG|B)$/.test(el.tagName) && /^[A-Z][A-Z &/]+:$/.test(t)))){ head(headName(t.replace(/^[^\p{L}\p{N}]+/u, ''))); taken.add(el); return; }
       if (/(^|\s)(el-item|item|el-fullitem)(\s|$)/.test(c) && el.querySelector('a[href]')){ taken.add(el); push(cooperItem(el)); return; }
       if (el.tagName === 'LI' && el.querySelector('a[href]')){ taken.add(el); push(cooperItem(el)); }
     });
@@ -298,8 +305,10 @@ function cooperItem(el){
   if (!a) return null;
   const title = clean(a.textContent);
   const nameEl = el.querySelector('.name, .author');
-  const author = nameEl ? clean(nameEl.textContent) : '';
-  let desc = clean((el.querySelector('.desc') || el).textContent);
+  let author = nameEl ? clean(nameEl.textContent) : '';
+  const lines = linesOf(el.querySelector('.desc') || el).filter(l => !/^sponsor$/i.test(l));
+  if (!author && lines.length > 1){ const last = lines[lines.length - 1]; if (last.length < 70 && !/[.!?:]$/.test(last) && !last.includes(title)) author = lines.pop().replace(/\s*sponsor\s*$/i, ''); }
+  let desc = lines.join(' ');
   desc = desc.replace(title, '').replace(author, '').replace(/^[\s—–\-:|]+/, '').replace(/\bsponsor\b\s*$/i, '').trim();
   const sp = /sponsor/i.test(el.innerHTML.match(/class="[^"]*"/g)?.join(' ') || '') || /\bsponsor\b/i.test(el.textContent.slice(-40));
   return {title, href: a.getAttribute('href'), desc, author, sp};
@@ -438,7 +447,11 @@ async function load(n){
       parsed = parse(await fetchHTML(u.url), L.kind);
       if (u.date && !parsed.date) parsed.date = u.date;
       n = u.n || n;
-      if (!n){ if (!parsed.num) throw new Error('最新号の番号を読み取れませんでした'); n = parsed.num; }
+      if (!n){
+        const fm = lastFinal.match(/\/issues\/(\d+)/);
+        n = parsed.num || (fm ? +fm[1] : 0);
+        if (!n) throw new Error('最新号の番号を読み取れませんでした');
+      }
       if (id !== loadId) return;
       if (!parsed.sections.length) throw new Error('記事を見つけられませんでした（ページ構造が変わった可能性）');
       store.set('jsw-' + lang + '-' + n, parsed);
@@ -488,7 +501,7 @@ function showFallback(n, msg){
   const embed = store.get('jsw-embed-' + lang, false);
   $('#deck').innerHTML = '<div class="page fb">' + (embed
     ? '<div class="fbbar"><span title="' + esc(msg) + '">元のページを表示中</span>' + BTN_OPEN + BTN_RETRY + '<button class="btn sm" id="fbhide" aria-label="埋め込みをやめる" title="埋め込みをやめる">×</button></div><iframe id="fbframe" title="元のページ" referrerpolicy="no-referrer"></iframe>'
-    : '<div class="fbcard"><span title="' + esc(msg) + '">取得できませんでした</span>' + BTN_OPEN + '<button class="btn sm" id="fbembed" aria-label="ここに表示" title="ここに表示"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/></svg></button>' + BTN_RETRY + '</div>') + '</div>';
+    : '<div class="fbcard"><span title="' + esc(msg) + '">取得できませんでした<small>' + esc(msg.split('\n')[0]) + '</small></span>' + BTN_OPEN + '<button class="btn sm" id="fbembed" aria-label="ここに表示" title="ここに表示"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/></svg></button>' + BTN_RETRY + '</div>') + '</div>';
   const em = $('#fbembed'); if (em) em.onclick = () => { store.set('jsw-embed-' + lang, true); showFallback(n, fbMsg); };
   const hd = $('#fbhide'); if (hd) hd.onclick = () => { store.set('jsw-embed-' + lang, false); showFallback(n, fbMsg); };
   $('#retry').onclick = () => load(n);
