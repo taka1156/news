@@ -14,7 +14,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<meta name="version" content="2026-11-25.7">
+<meta name="version" content="2026-11-25.8">
 <title>Weekly Reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -119,12 +119,42 @@ summary{list-style:none}summary::-webkit-details-marker{display:none}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 @media(max-width:600px){h1 #num{font-size:30px}.page h2{font-size:21px}.wrap,.page{padding-inline:16px}.tabs{padding-inline:16px}}
 @media(prefers-reduced-motion:reduce){.btn{transition:none}}
+ /* ---- 表示領域を広く ---- */
+.app{grid-template-rows:auto auto 1fr auto}
+.app>header{grid-row:1}.prog{grid-row:2}.deck{grid-row:3}.app>footer{grid-row:4}.tabs{display:none}
+header{align-items:center;gap:2px;padding-block:8px 2px}
+h1{font-size:14px;line-height:1.3;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-left:2px}
+h1 #num{display:inline;margin:0;font-size:14px;font-weight:600;color:var(--dim);letter-spacing:0}
+h1 small{display:inline;margin:0 0 0 6px;font-size:12px;color:var(--dim);font-weight:400}
+.lp{flex:none}
+.lsel{gap:2px;grid-auto-flow:column;padding:0 6px 0 10px;font-weight:700;color:var(--ink)}
+.lsel::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--acc);margin-right:6px}
+.lsel svg{width:16px;height:16px}
+.lmenu{position:absolute;left:0;top:44px;z-index:6;display:grid;min-width:180px;padding:6px;background:var(--bg);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.14)}
+.lmenu .lang{display:flex;align-items:center;gap:10px;height:40px;padding:0 10px;border-radius:8px;text-align:left}
+.lmenu .lang:hover{background:var(--hover)}
+.lmenu .lang i{width:22px;font-weight:700;color:var(--ink)}
+.lmenu .lang span{display:inline;font-weight:500}
+.lmenu .lang::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--lc);margin:0;flex:none}
+.lmenu .lang[aria-pressed=true]{background:var(--hover);color:var(--ink)}
+.lmenu .lang[aria-pressed=true]::before{margin:0}
+.prog{padding-block:4px 2px}
+.page{padding-top:10px;padding-bottom:16px}
+.page h2{font-size:18px;margin:0 0 2px}
+.it{padding:14px 0}
+footer{gap:6px;padding-block:4px 6px}
+footer .btn{height:40px}
+.btn.play{width:42px;height:42px}
+#toast{bottom:calc(60px + env(safe-area-inset-bottom))}
+.set{top:46px}
+@media(max-width:600px){.page h2{font-size:17px}h1 small{display:none}}
 </style>
 </head>
 <body>
 <div class="app">
   <header class="wrap">
-    <h1><span id="lname">JavaScript Weekly</span> <span id="num">#—</span><small id="date">読み込み中…</small></h1>
+    <details class="lp"><summary class="btn lsel" aria-label="言語を選ぶ"><span id="lmono">JS</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></summary><div class="lmenu" id="langs" role="group" aria-label="言語"></div></details>
+    <h1><span id="lname">JavaScript Weekly</span> <span id="num">#—</span> <small id="date">読み込み中…</small></h1>
     <button class="btn ic" id="tr" aria-pressed="false" aria-label="日本語に翻訳" title="翻訳 (T)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z"/></svg></button>
     <button class="btn ic" id="theme" aria-label="ライト/ダーク切替"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="th-moon" d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/><g class="th-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg></button>
     <details>
@@ -138,12 +168,11 @@ summary{list-style:none}summary::-webkit-details-marker{display:none}
         <div id="trInfo">翻訳エンジン: 確認中</div>
         <label for="px">CORSプロキシ（{url} に記事URL。改行で複数、上から順に試行）</label>
         <textarea id="px" rows="4"></textarea>
-        <p style="font-size:12px">バージョン 2026-11-25.7</p>
+        <p style="font-size:12px">バージョン 2026-11-25.8</p>
         <p>キー操作：Space 再生／← → セクション／[ ] 号／T 翻訳。カードを押している間は一時停止。</p>
       </div>
     </details>
   </header>
-  <div class="langs wrap" id="langs" role="group" aria-label="言語"></div>
   <nav class="tabs" id="tabs" aria-label="セクション"></nav>
   <div class="prog wrap"><div class="bars" id="bars"></div><span id="pos">–</span></div>
   <main class="deck" id="deck"><div class="page"><div class="state">読み込み中…</div></div></main>
@@ -553,6 +582,8 @@ function setLang(l, n){
   lang = l; store.set('jsw-lang', l);
   document.documentElement.dataset.lang = l;
   $('#lname').textContent = LANGS[l].name;
+  $('#lmono').textContent = LANGS[l].mono;
+  const lp = $('.lp'); if (lp) lp.open = false;
   document.title = LANGS[l].name + ' Reader';
   document.querySelectorAll('.lang').forEach(b => b.setAttribute('aria-pressed', b.dataset.l === l));
   issue = 0;
@@ -634,7 +665,8 @@ paintSpd();
 
 /* ---------- イベント ---------- */
 $('#langs').innerHTML = Object.entries(LANGS).map(([k, v]) => '<button class="lang" data-l="' + k + '" style="--lc:var(--c-' + k + ')" aria-label="' + v.label + '"><i>' + v.mono + '</i><span>' + v.label + '</span></button>').join('');
-$('#langs').addEventListener('click', e => { const b = e.target.closest('.lang'); if (b && b.dataset.l !== lang) setLang(b.dataset.l); });
+$('#langs').addEventListener('click', e => { const b = e.target.closest('.lang'); if (!b) return; if (b.dataset.l !== lang) setLang(b.dataset.l); else $('.lp').open = false; });
+document.addEventListener('click', e => { document.querySelectorAll('details[open]').forEach(d => { if (!d.contains(e.target)) d.open = false; }); });
 $('#latest').onclick = () => load(0);
 let st;
 $('#deck').addEventListener('scroll', e => {
