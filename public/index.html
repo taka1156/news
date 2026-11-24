@@ -14,7 +14,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<meta name="version" content="2026-11-25.10">
+<meta name="version" content="2026-11-25.12">
 <title>Weekly Reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -56,7 +56,7 @@ button,input,textarea{font:inherit;color:inherit}
 .lang:hover{color:var(--ink)}
 .tabs{display:flex;gap:16px;overflow-x:auto;padding:10px 20px 4px;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
-.tabs:empty{display:none}
+.tabs:empty,.prog:has(.bars:empty){display:none}
 .tab{flex:none;height:30px;padding:0;border:0;background:none;color:var(--dim);font-size:13px;cursor:pointer;white-space:nowrap}
 .tab.on{color:var(--ink);font-weight:600}
 .prog{display:flex;align-items:center;gap:12px;padding-block:8px 4px}
@@ -155,7 +155,8 @@ footer .btn{height:40px}
 .deck{grid-row:2}.bar{grid-row:3}
 .app{padding-top:0}
 #pos{display:none}
-#date{flex:none;font-size:12px;font-weight:600;color:var(--sub);font-variant-numeric:tabular-nums}
+#date{font-size:13px;font-weight:600;color:var(--dim);font-variant-numeric:tabular-nums}
+#date::before{content:"·";margin:0 4px}
 #date:empty{display:none}
 .page{padding-top:12px;padding-bottom:12px}
 .bar{display:flex;align-items:center;gap:2px;padding-block:4px calc(4px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
@@ -170,16 +171,29 @@ footer .btn{height:40px}
 .set h1 small{display:block;margin:2px 0 0;font-size:12px;color:var(--dim)}
 .btn.thm{display:flex;gap:8px;width:100%;justify-content:flex-start;padding:0 10px;border:1px solid var(--line);color:var(--sub)}
 #toast{bottom:calc(64px + env(safe-area-inset-bottom))}
-@media(max-width:380px){.bar .btn.ic{width:32px;min-width:32px}}
+@media(max-width:440px){.bar{gap:0;padding-inline:6px}.bar .btn.ic{width:29px;min-width:29px}.bar .btn.play{width:40px;height:40px}.lsel{padding:0 2px 0 6px}.lsel svg{width:14px}}
+@media(max-width:400px){.lsel #num{display:none}#date::before{content:none}#date{margin-left:5px}}
+@media(max-width:370px){.bar .btn.ic{width:28px;min-width:28px}.bar .btn.play{width:38px;height:38px}.lsel #num{display:none}#date::before{content:none}#date{margin-left:5px}}
+.driver-popover.wr-tour{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:12px;font-family:inherit;box-shadow:0 12px 32px rgba(0,0,0,.25)}
+.driver-popover.wr-tour .driver-popover-title{font-family:inherit;font-size:15px;font-weight:600}
+.driver-popover.wr-tour .driver-popover-description{font-family:inherit;font-size:14px;line-height:1.6;color:var(--sub)}
+.driver-popover.wr-tour .driver-popover-progress-text{color:var(--dim)}
+.driver-popover.wr-tour .driver-popover-footer button{font-family:inherit;text-shadow:none;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:5px 12px}
+.driver-popover.wr-tour .driver-popover-footer .driver-popover-next-btn{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.driver-popover.wr-tour .driver-popover-close-btn{color:var(--dim)}
+.driver-popover.wr-tour .driver-popover-arrow-side-top{border-top-color:var(--bg)}
+.driver-popover.wr-tour .driver-popover-arrow-side-bottom{border-bottom-color:var(--bg)}
+.driver-popover.wr-tour .driver-popover-arrow-side-left{border-left-color:var(--bg)}
+.driver-popover.wr-tour .driver-popover-arrow-side-right{border-right-color:var(--bg)}
 </style>
 </head>
 <body>
 <div class="app">
   <nav class="tabs" id="tabs" aria-label="セクション"></nav>
-  <div class="prog wrap"><div class="bars" id="bars"></div><span id="pos">–</span><time id="date"></time></div>
+  <div class="prog wrap"><div class="bars" id="bars"></div><span id="pos">–</span></div>
   <main class="deck" id="deck"><div class="page"><div class="state">読み込み中…</div></div></main>
   <nav class="bar wrap" aria-label="操作">
-    <details class="lp"><summary class="btn lsel" aria-label="言語を選ぶ"><span id="lmono">JS</span><span id="num">#—</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></summary><div class="lmenu" id="langs" role="group" aria-label="言語"></div></details>
+    <details class="lp"><summary class="btn lsel" aria-label="言語を選ぶ"><span id="lmono">JS</span><span id="num">#—</span><time id="date"></time><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></summary><div class="lmenu" id="langs" role="group" aria-label="言語"></div></details>
     <span class="sp"></span>
     <button class="btn ic" id="prev" aria-label="前の号" title="前の号 ["><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5l-7 7 7 7M19 5l-7 7 7 7"/></svg></button>
     <button class="btn ic" id="back" aria-label="前のセクション" title="前のセクション ←"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
@@ -188,8 +202,9 @@ footer .btn{height:40px}
     <button class="btn ic" id="next" aria-label="次の号" title="次の号 ]"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l7 7-7 7M12 5l7 7-7 7"/></svg></button>
     <span class="sp"></span>
     <button class="btn ic" id="tr" aria-pressed="false" aria-label="日本語に翻訳" title="翻訳 (T)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z"/></svg></button>
+    <button class="btn ic" id="help" aria-label="使い方" title="使い方"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></svg></button>
     <details class="sd">
-      <summary class="btn ic" aria-label="設定"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></summary>
+      <summary class="btn ic" id="setbtn" aria-label="設定"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></summary>
       <div class="set">
         <h1><span id="lname">JavaScript Weekly</span></h1>
         <button class="btn thm" id="theme" aria-label="ライト/ダーク切替"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="th-moon" d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/><g class="th-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg><span>ライト / ダーク</span></button>
@@ -201,8 +216,8 @@ footer .btn{height:40px}
         <div id="trInfo">翻訳エンジン: 確認中</div>
         <label for="px">CORSプロキシ（{url} に記事URL。改行で複数、上から順に試行）</label>
         <textarea id="px" rows="4"></textarea>
-        <p style="font-size:12px">バージョン 2026-11-25.10</p>
-        <p>キー操作：Space 再生／← → セクション／[ ] 号／T 翻訳。カードを押している間は一時停止。</p>
+        <p style="font-size:12px">バージョン 2026-11-25.12</p>
+        <p>？ボタンで使い方ツアー。キー操作：Space 再生／← → セクション／[ ] 号／T 翻訳。カードを押している間は一時停止。</p>
       </div>
     </details>
   </nav>
@@ -494,7 +509,8 @@ function fmtDate(d){
 // 画面に収まるだけ記事を詰めてページを作る（収まらない1件は単独ページ）
 function render(keep){
   const s = data.sections, deck = $('#deck'), pages = [], first = [], tpl = document.createElement('template');
-  $('#date').textContent = fmtDate(data.date);
+  const fd = fmtDate(data.date);
+  $('#date').textContent = fd ? fd.slice(5) : ''; $('#date').title = fd;
   $('#tabs').innerHTML = s.map((x, i) => '<button class="tab" data-i="' + i + '">' + esc(x.name) + '</button>').join('');
   deck.innerHTML = '';
   s.forEach((x, si) => {
@@ -660,6 +676,38 @@ function toast(msg){
   t.textContent = msg; t.classList.add('on');
   clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2400);
 }
+
+/* ---------- 使い方ツアー（Driver.js を必要なときだけ読み込む） ---------- */
+const DRIVER = 'https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/';
+let driverReady;
+function loadDriver(){
+  if (driverReady) return driverReady;
+  driverReady = new Promise((ok, ng) => {
+    const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = DRIVER + 'driver.css'; document.head.append(l);
+    const sc = document.createElement('script'); sc.src = DRIVER + 'driver.js.iife.js';
+    sc.onload = () => ok(window.driver.js.driver); sc.onerror = () => { driverReady = null; ng(new Error('load')); };
+    document.head.append(sc);
+  });
+  return driverReady;
+}
+async function startTour(){
+  setPlaying(false);
+  document.querySelectorAll('details[open]').forEach(d => d.open = false);
+  let driver;
+  try{ driver = await loadDriver(); }catch(e){ toast('ツアーを読み込めませんでした'); return; }
+  const steps = [
+    {element:'#deck', popover:{title:'記事', description:'左右にスワイプ（または ← →）でページをめくります。'}},
+    {element:'#bars', popover:{title:'進み具合', description:'この号のどこを読んでいるか。線を押すとそのページへ飛びます。'}},
+    {element:'.lsel', popover:{title:'言語・号・日付', description:'押すと JS / Go / Py / Rs を切り替えられます。'}},
+    {element:'#prev', popover:{title:'号を移動', description:'« で1つ古い号、» で1つ新しい号へ。'}},
+    {element:'#back', popover:{title:'ページを移動', description:'‹ › で前後のページへ。'}},
+    {element:'#play', popover:{title:'自動再生', description:'文字量に合わせて自動でめくり、号の最後で次の号へ進みます。記事を押している間は一時停止。'}},
+    {element:'#tr', popover:{title:'翻訳', description:'記事を日本語に翻訳します。原文も下に残ります。'}},
+    {element:'#setbtn', popover:{title:'設定', description:'号数で移動、最新号、自動再生の速さ、ライト / ダークの切り替えなど。'}}
+  ].filter(st => { const el = document.querySelector(st.element); return el && el.offsetParent !== null; });
+  driver({showProgress:true, progressText:'{{current}} / {{total}}', nextBtnText:'次へ', prevBtnText:'戻る', doneBtnText:'閉じる', popoverClass:'wr-tour', steps}).drive();
+}
+$('#help').onclick = startTour;
 
 /* ---------- 自動再生 ---------- */
 let playing = false, hold = false, elapsed = 0, dur = 0, lastT = 0, spd = store.get('jsw-spd', 1);
