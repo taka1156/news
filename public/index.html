@@ -14,10 +14,10 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<meta name="version" content="2026-11-25.12">
+<meta name="version" content="2026-11-25.13">
 <title>Weekly Reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* VOICE: 紙のニュースレターのように静か。装飾より文字
    IDEA: 号ごとに綴じた薄い冊子を一枚ずつめくる
@@ -185,24 +185,34 @@ footer .btn{height:40px}
 .driver-popover.wr-tour .driver-popover-arrow-side-bottom{border-bottom-color:var(--bg)}
 .driver-popover.wr-tour .driver-popover-arrow-side-left{border-left-color:var(--bg)}
 .driver-popover.wr-tour .driver-popover-arrow-side-right{border-right-color:var(--bg)}
+ /* ---- ヘッダーに言語・翻訳・設定、フッターは送りだけ ---- */
+.app{grid-template-rows:auto auto 1fr auto}
+.hd{grid-row:1}.prog{grid-row:2}.deck{grid-row:3}.bar{grid-row:4}
+.hd{display:flex;align-items:center;gap:2px;padding-top:calc(2px + env(safe-area-inset-top));padding-bottom:0}
+.hd .sp,.bar .sp{flex:1}
+.logo{font-family:"Instrument Serif",Georgia,serif;font-size:23px;line-height:1;letter-spacing:-.015em;color:var(--ink);white-space:nowrap;padding-top:2px}
+.hd .btn.ic{width:36px;min-width:36px;height:38px}
+.hd .lsel{height:38px}
+.prog{padding-top:2px}
+.lmenu{top:40px;bottom:auto;left:auto;right:0}
+.set{top:42px;bottom:auto}
+.bar .btn.ic{width:42px;min-width:42px;height:38px}
+.bar .btn.play{width:40px;height:40px;margin:0 6px}
+.bar #help{position:absolute;right:max(10px,env(safe-area-inset-right))}
+.bar{position:relative;gap:6px;padding-block:3px calc(3px + env(safe-area-inset-bottom))}
+@media(max-width:440px){.bar{gap:4px}.bar .btn.ic{width:40px;min-width:40px}}
+@media(max-width:400px){.lsel #num{display:inline}#date::before{content:"·"}#date{margin-left:0}}
+@media(max-width:370px){.logo{font-size:20px}.lsel #num{display:none}#date::before{content:none}#date{margin-left:5px}.bar .btn.ic{width:38px;min-width:38px}.bar .btn.play{margin:0 4px}}
 </style>
 </head>
 <body>
 <div class="app">
   <nav class="tabs" id="tabs" aria-label="セクション"></nav>
-  <div class="prog wrap"><div class="bars" id="bars"></div><span id="pos">–</span></div>
-  <main class="deck" id="deck"><div class="page"><div class="state">読み込み中…</div></div></main>
-  <nav class="bar wrap" aria-label="操作">
+  <header class="hd wrap">
+    <span class="logo" aria-label="Weekly Reader">Weekly Reader</span>
+    <span class="sp"></span>
     <details class="lp"><summary class="btn lsel" aria-label="言語を選ぶ"><span id="lmono">JS</span><span id="num">#—</span><time id="date"></time><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></summary><div class="lmenu" id="langs" role="group" aria-label="言語"></div></details>
-    <span class="sp"></span>
-    <button class="btn ic" id="prev" aria-label="前の号" title="前の号 ["><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5l-7 7 7 7M19 5l-7 7 7 7"/></svg></button>
-    <button class="btn ic" id="back" aria-label="前のセクション" title="前のセクション ←"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-    <button class="btn ic play" id="play" aria-pressed="false" aria-label="自動再生" title="自動再生 (Space)"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="pl" d="M8 5.5v13a1 1 0 0 0 1.5.9l10-6.5a1 1 0 0 0 0-1.7l-10-6.5A1 1 0 0 0 8 5.5z"/><g class="pa"><rect x="6.5" y="5" width="4" height="14" rx="1.5"/><rect x="13.5" y="5" width="4" height="14" rx="1.5"/></g></svg></button>
-    <button class="btn ic" id="fwd" aria-label="次のセクション" title="次のセクション →"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
-    <button class="btn ic" id="next" aria-label="次の号" title="次の号 ]"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l7 7-7 7M12 5l7 7-7 7"/></svg></button>
-    <span class="sp"></span>
     <button class="btn ic" id="tr" aria-pressed="false" aria-label="日本語に翻訳" title="翻訳 (T)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z"/></svg></button>
-    <button class="btn ic" id="help" aria-label="使い方" title="使い方"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></svg></button>
     <details class="sd">
       <summary class="btn ic" id="setbtn" aria-label="設定"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></summary>
       <div class="set">
@@ -216,10 +226,22 @@ footer .btn{height:40px}
         <div id="trInfo">翻訳エンジン: 確認中</div>
         <label for="px">CORSプロキシ（{url} に記事URL。改行で複数、上から順に試行）</label>
         <textarea id="px" rows="4"></textarea>
-        <p style="font-size:12px">バージョン 2026-11-25.12</p>
+        <p style="font-size:12px">バージョン 2026-11-25.13</p>
         <p>？ボタンで使い方ツアー。キー操作：Space 再生／← → セクション／[ ] 号／T 翻訳。カードを押している間は一時停止。</p>
       </div>
     </details>
+  </header>
+  <div class="prog wrap"><div class="bars" id="bars"></div><span id="pos">–</span></div>
+  <main class="deck" id="deck"><div class="page"><div class="state">読み込み中…</div></div></main>
+  <nav class="bar wrap" aria-label="操作">
+    <span class="sp"></span>
+    <button class="btn ic" id="prev" aria-label="前の号" title="前の号 ["><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5l-7 7 7 7M19 5l-7 7 7 7"/></svg></button>
+    <button class="btn ic" id="back" aria-label="前のセクション" title="前のセクション ←"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button class="btn ic play" id="play" aria-pressed="false" aria-label="自動再生" title="自動再生 (Space)"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="pl" d="M8 5.5v13a1 1 0 0 0 1.5.9l10-6.5a1 1 0 0 0 0-1.7l-10-6.5A1 1 0 0 0 8 5.5z"/><g class="pa"><rect x="6.5" y="5" width="4" height="14" rx="1.5"/><rect x="13.5" y="5" width="4" height="14" rx="1.5"/></g></svg></button>
+    <button class="btn ic" id="fwd" aria-label="次のセクション" title="次のセクション →"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+    <button class="btn ic" id="next" aria-label="次の号" title="次の号 ]"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l7 7-7 7M12 5l7 7-7 7"/></svg></button>
+    <span class="sp"></span>
+    <button class="btn ic" id="help" aria-label="使い方" title="使い方"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></svg></button>
   </nav>
 </div>
 <script>
