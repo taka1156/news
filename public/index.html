@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Weekly Reader</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&family=M+PLUS+Rounded+1c:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: やわらかく、手に取りたくなる道具
+   IDEA: 粘土でこねた小物（クレイモーフィズム）
+   PICTURE: ぷっくり膨らんだ記事カードの束を横にめくる
+   COLOUR and TYPE: 淡いラベンダーの地、言語ごとのパステル粘土色／Nunito + M PLUS Rounded 1c
+   LAYOUT: 上に号・操作・言語・セクション、中央に横スナップ、下に号送り */
+:root{color-scheme:light dark;
+  --bg:light-dark(#eceef8,#1c1e29);--card:light-dark(#fbfbff,#292c3b);
+  --ink:light-dark(#262a3a,#eceef6);--sub:light-dark(#545a70,#b3b8cc);--dim:light-dark(#888da2,#80869c);
+  --shade:light-dark(rgba(60,70,120,.16),rgba(0,0,0,.42));--light:light-dark(rgba(255,255,255,.95),rgba(255,255,255,.07));
+  --drop:light-dark(rgba(70,80,140,.30),rgba(0,0,0,.6));
+  --c-js:#ffd84d;--c-go:#72d4ee;--c-py:#8fb3ff;--c-rs:#ff9f6b;--on:#1d1f2a;--acc:var(--c-js);
+  --clay:0 16px 30px -14px var(--drop),inset -5px -6px 12px var(--shade),inset 5px 6px 12px var(--light);
+  --clay-s:0 8px 16px -8px var(--drop),inset -3px -4px 8px var(--shade),inset 3px 4px 8px var(--light);
+  --clay-c:0 8px 18px -8px var(--drop),inset -3px -4px 8px rgba(0,0,0,.16),inset 3px 4px 8px rgba(255,255,255,.6);
+  --press:inset 4px 5px 10px var(--shade),inset -3px -3px 8px var(--light)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+:root[data-lang=go]{--acc:var(--c-go)}:root[data-lang=py]{--acc:var(--c-py)}:root[data-lang=rs]{--acc:var(--c-rs)}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 Nunito,"M PLUS Rounded 1c",system-ui,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
+.app{height:100dvh;display:grid;grid-template-rows:auto auto auto auto 1fr auto;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.wrap{padding-inline:max(4vw,16px)}
+.app>header{grid-row:1}.langs{grid-row:2}.tabs{grid-row:3}.prog{grid-row:4}.deck{grid-row:5}.app>footer{grid-row:6}
+header{display:flex;align-items:center;gap:12px;padding-block:16px 12px}
+h1{margin:0;flex:1;font-size:21px;line-height:1.15;font-weight:800;letter-spacing:-.01em}
+h1 #num{color:var(--dim);font-weight:700}
+h1 small{display:block;font-size:13px;color:var(--dim);font-weight:500;margin-top:3px;letter-spacing:0}
+button,input,textarea{font:inherit;color:inherit}
+.btn{height:46px;min-width:46px;padding:0 18px;border:0;border-radius:18px;background:var(--card);box-shadow:var(--clay-s);color:var(--sub);font-weight:700;cursor:pointer;display:inline-grid;place-items:center;transition:transform .15s,box-shadow .2s,background .2s}
+.btn.ic{padding:0;width:46px}
+.btn svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.btn:active{transform:scale(.94)}
+.btn[aria-pressed=true],details[open]>.btn{background:var(--acc);color:var(--on);box-shadow:var(--clay-c)}
+:focus-visible{outline:3px solid var(--acc);outline-offset:3px}
+.th-sun{display:none}:root[data-theme=dark] .th-sun{display:block}:root[data-theme=dark] .th-moon{display:none}
+.langs{display:flex;gap:10px;flex-wrap:wrap;padding-block:2px 12px}
+.lang{display:flex;align-items:center;height:46px;padding:5px;border:0;border-radius:23px;background:var(--card);box-shadow:var(--clay-s);cursor:pointer;transition:background .3s,box-shadow .3s,transform .15s}
+.lang:active{transform:scale(.95)}
+.lang i{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font:800 13px/1 Nunito,sans-serif;font-style:normal;color:var(--on);background:var(--lc);box-shadow:inset -2px -3px 6px rgba(0,0,0,.15),inset 2px 3px 6px rgba(255,255,255,.6)}
+.lang span{max-width:0;overflow:hidden;white-space:nowrap;font-weight:800;font-size:15px;color:var(--on);transition:max-width .35s ease,padding .35s ease}
+.lang[aria-pressed=true]{background:var(--lc);box-shadow:var(--clay-c)}
+.lang[aria-pressed=true] i{background:rgba(255,255,255,.55);box-shadow:inset 2px 3px 5px rgba(255,255,255,.7),inset -2px -2px 5px rgba(0,0,0,.08)}
+.lang[aria-pressed=true] span{max-width:120px;padding:0 14px 0 9px}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:8px max(4vw,16px) 14px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs:empty,.prog:has(.bars:empty){display:none}
+.tab{flex:none;height:36px;padding:0 15px;border:0;border-radius:14px;background:none;color:var(--dim);font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .2s,box-shadow .2s,color .2s}
+.tab.on{background:var(--card);box-shadow:var(--clay-s);color:var(--ink)}
+.deck{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none}
+.deck::-webkit-scrollbar{display:none}
+.page{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;overflow-y:auto;padding:12px max(4vw,16px) 40px}
+.page>div{max-width:720px;margin:0 auto}
+.page h2{display:flex;align-items:center;gap:10px;font-size:28px;line-height:1.15;margin:4px 4px 22px;font-weight:800;text-wrap:balance}
+.page h2 span{flex:none;font-size:13px;font-weight:800;color:var(--on);background:var(--acc);border-radius:10px;padding:2px 9px;box-shadow:var(--clay-c)}
+.it{background:var(--card);border-radius:26px;box-shadow:var(--clay);padding:20px 22px;margin-bottom:22px}
+.it a.t{color:var(--ink);font-weight:800;font-size:17.5px;line-height:1.4;text-decoration:none}
+.it a.t:hover{text-decoration:underline;text-decoration-color:var(--acc);text-decoration-thickness:3px;text-underline-offset:4px}
+.it p{margin:8px 0 0;color:var(--sub)}
+.it a.t+p{margin-top:8px}.it>p:first-child{margin-top:0}
+.meta{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px;font-size:13px;color:var(--dim);font-weight:700}
+.tag{color:var(--on);background:var(--acc);border-radius:8px;padding:1px 8px;box-shadow:var(--clay-c)}
+.more{color:var(--sub)}
+.ja{display:block}
+.ja+.en{display:block;margin-top:6px;font-size:13px;color:var(--dim);font-weight:500}
+.state{min-height:60vh;display:grid;place-content:center;text-align:center;gap:14px;color:var(--dim);font-weight:700}
+.page.fb{display:flex;flex-direction:column;gap:10px;overflow:hidden;padding-top:4px;padding-bottom:12px}
+.fbcard{align-self:center;margin:auto 0;display:flex;align-items:center;gap:8px;background:var(--card);border-radius:18px;box-shadow:var(--clay-s);padding:8px 8px 8px 16px;font-size:13px;font-weight:700;color:var(--dim);max-width:100%}
+.fbcard span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fbbar{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--dim)}
+.fbbar span{flex:1;text-align:left;padding-left:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fb .btn.sm{height:34px;min-width:34px;width:34px;padding:0;border-radius:12px;text-decoration:none}
+.fb .btn.sm svg{width:16px;height:16px}
+.fb iframe{flex:1;width:100%;border:0;border-radius:22px;background:#fff;box-shadow:var(--clay)}
+:root[data-theme=dark] .fb iframe{filter:invert(.92) hue-rotate(180deg)}
+.state code{color:var(--sub);overflow-wrap:anywhere;white-space:pre-line;font-size:13px}
+footer{display:flex;align-items:center;justify-content:center;gap:14px;padding-block:12px 16px}
+.btn.play{width:60px;height:60px;border-radius:24px;background:var(--acc);color:var(--on);box-shadow:var(--clay-c)}
+.btn.play svg{width:24px;height:24px;fill:currentColor;stroke:none}
+.btn.play .pa,.btn.play[aria-pressed=true] .pl{display:none}.btn.play[aria-pressed=true] .pa{display:block}
+.btn.play[aria-pressed=true]{box-shadow:var(--press);background:var(--acc)}
+.prog{display:flex;align-items:center;gap:12px;padding-bottom:6px}
+.bars{flex:1;display:flex;gap:4px;height:8px}
+.bars b{flex:1;border-radius:4px;background:var(--card);box-shadow:inset 1px 1px 3px var(--shade);overflow:hidden;cursor:pointer}
+.bars b i{display:block;height:100%;background:var(--acc);border-radius:4px;transform-origin:left;transform:scaleX(0)}
+#pos{flex:none;font-size:12px;font-weight:800;color:var(--dim)}
+.page h2 small{font-size:15px;color:var(--dim);font-weight:700}
+.row{display:flex;gap:8px;align-items:center}
+.row input{flex:1;height:42px;font-size:16px;font-weight:700;text-align:center;background:var(--bg);border:0;border-radius:14px;box-shadow:var(--press)}
+.seg{display:flex;gap:6px}.seg button{flex:1;height:38px;border:0;border-radius:12px;background:var(--bg);box-shadow:var(--clay-s);font-weight:700;color:var(--sub);cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--acc);color:var(--on);box-shadow:var(--clay-c)}
+details{position:relative}
+summary{list-style:none}summary::-webkit-details-marker{display:none}
+.set{position:absolute;right:0;top:60px;z-index:5;width:min(340px,88vw);background:var(--card);border-radius:24px;box-shadow:var(--clay);padding:20px;font-size:14px;color:var(--sub)}
+.set label{display:block;margin:14px 0 8px;color:var(--ink);font-weight:700}
+.set textarea{width:100%;background:var(--bg);border:0;border-radius:16px;box-shadow:var(--press);padding:10px 12px;font:13px/1.5 system-ui;resize:vertical}
+.set p{margin:12px 0 0;color:var(--dim)}
+@media(max-width:600px){h1{font-size:18px}.page h2{font-size:24px}header{gap:10px}footer{gap:10px}.langs{gap:8px}.lang[aria-pressed=true] span{padding:0 12px 0 7px}}
+@media(prefers-reduced-motion:reduce){.btn,.lang,.lang span,.tab{transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="wrap">
+    <h1><span id="lname">JavaScript Weekly</span> <span id="num">#—</span><small id="date">読み込み中…</small></h1>
+    <button class="btn ic" id="tr" aria-pressed="false" aria-label="日本語に翻訳" title="翻訳 (T)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z"/></svg></button>
+    <button class="btn ic" id="theme" aria-label="ライト/ダーク切替"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="th-moon" d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/><g class="th-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg></button>
+    <details>
+      <summary class="btn ic" aria-label="設定"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></summary>
+      <div class="set">
+        <label for="jump" style="margin-top:0">号へ移動</label>
+        <div class="row"><input id="jump" inputmode="numeric" placeholder="号数で移動"><button class="btn" id="latest">最新</button></div>
+        <label>自動再生の速さ</label>
+        <div class="seg" id="spd"><button data-v="0">ゆっくり</button><button data-v="1">ふつう</button><button data-v="2">はやい</button></div>
+        <label>翻訳</label>
+        <div id="trInfo">翻訳エンジン: 確認中</div>
+        <label for="px">CORSプロキシ（{url} に記事URL。改行で複数、上から順に試行）</label>
+        <textarea id="px" rows="4"></textarea>
+        <p>キー操作：Space 再生／← → セクション／[ ] 号／T 翻訳。カードを押している間は一時停止。</p>
+      </div>
+    </details>
+  </header>
+  <div class="langs wrap" id="langs" role="group" aria-label="言語"></div>
+  <nav class="tabs" id="tabs" aria-label="セクション"></nav>
+  <div class="prog wrap"><div class="bars" id="bars"></div><span id="pos">–</span></div>
+  <main class="deck" id="deck"><div class="page"><div class="state">読み込み中…</div></div></main>
+  <footer class="wrap">
+    <button class="btn ic" id="prev" aria-label="前の号" title="前の号 ["><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5l-7 7 7 7M19 5l-7 7 7 7"/></svg></button>
+    <button class="btn ic" id="back" aria-label="前のセクション" title="前のセクション ←"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button class="btn ic play" id="play" aria-pressed="false" aria-label="自動再生" title="自動再生 (Space)"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="pl" d="M8 5.5v13a1 1 0 0 0 1.5.9l10-6.5a1 1 0 0 0 0-1.7l-10-6.5A1 1 0 0 0 8 5.5z"/><g class="pa"><rect x="6.5" y="5" width="4" height="14" rx="1.5"/><rect x="13.5" y="5" width="4" height="14" rx="1.5"/></g></svg></button>
+    <button class="btn ic" id="fwd" aria-label="次のセクション" title="次のセクション →"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+    <button class="btn ic" id="next" aria-label="次の号" title="次の号 ]"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l7 7-7 7M12 5l7 7-7 7"/></svg></button>
+  </footer>
+</div>
+<script>
+{
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+const LANGS = {
+  js: {label:'JavaScript', mono:'JS', name:'JavaScript Weekly', kind:'cooper',   base:'https://javascriptweekly.com', fb:812},
+  go: {label:'Go',         mono:'Go', name:'Go Weekly',         kind:'cooper',   base:'https://golangweekly.com',     fb:625},
+  py: {label:'Python',     mono:'Py', name:"PyCoder's Weekly",  kind:'pycoders', base:'https://pycoders.com',         fb:764},
+  rs: {label:'Rust',       mono:'Rs', name:'This Week in Rust', kind:'twir',     base:'https://this-week-in-rust.org', fb:678}
+};
+const DEF_PROXIES = ['https://corsproxy.io/?url={url}','https://api.allorigins.win/raw?url={url}','https://api.codetabs.com/v1/proxy?quest={url}'];
+const MONTHS = 'January|February|March|April|May|June|July|August|September|October|November|December';
+let proxies = store.get('jsw-proxies', DEF_PROXIES);
+// Cloudflare Worker などで配信しているときは、同じ場所の /proxy を最優先で使う
+const OWN = /^https?:$/.test(location.protocol) ? location.origin + '/proxy?url={url}' : '';
+const fromHash = () => { const m = location.hash.match(/^#(js|go|py|rs)(?:-(\d+))?$/); return m ? {lang:m[1], n:m[2] ? +m[2] : 0} : null; };
+let lang = fromHash()?.lang || store.get('jsw-lang', 'js');
+if (!LANGS[lang]) lang = 'js';
+let issue = 0, data = null, cur = 0, translating = store.get('jsw-tr', false), translator = null, engine = null;
+const trCache = store.get('jsw-trcache', {});
+
+/* ---------- 取得 ---------- */
+// プロキシを並列に試し、最初に成功したものを使う（各15秒でタイムアウト）
+async function fetchHTML(url){
+  const ctrls = [];
+  const one = async p => {
+    const c = new AbortController(); ctrls.push(c);
+    const to = setTimeout(() => c.abort(), 15000);
+    try{
+      const r = await fetch(p.replace('{url}', encodeURIComponent(url)), {signal: c.signal});
+      // 自前Worker以外のサイトに置いた場合、/proxy 自体が無くて404になるのは「号が無い」扱いにしない
+      if (r.status === 404 && (p !== OWN || r.headers.get('x-weekly-proxy'))) throw Object.assign(new Error('404'), {nf:true});
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const t = await r.text();
+      if (t.length < 500) throw new Error('空のレスポンス');
+      return t;
+    }catch(e){
+      throw e.name === 'AbortError' ? new Error('タイムアウト') : e.nf ? e : new Error(e.message === 'Failed to fetch' ? '接続できません' : e.message);
+    }finally{ clearTimeout(to); }
+  };
+  const list = (OWN ? [OWN] : []).concat(proxies);
+  if (!list.length) throw new Error('プロキシ未設定');
+  try{
+    const t = await Promise.any(list.map(one));
+    ctrls.forEach(c => c.abort());
+    return t;
+  }catch(agg){
+    const errs = agg.errors || [agg];
+    const nf = errs.find(e => e.nf);
+    if (nf) throw nf;
+    throw new Error(errs.map((e, i) => { let h = ''; try{ h = new URL(list[i].replace('{url}', ''), location.href).host; }catch(_){ h = 'proxy' + (i + 1); } return h + ': ' + e.message; }).join('\n'));
+  }
+}
+// This Week in Rust は URL に日付が入るので、号数→URL の対応表を作る
+async function twirIndex(force){
+  let c = store.get('jsw-rs-index', {t:0, map:{}});
+  const age = Date.now() - c.t, has = Object.keys(c.map).length;
+  if (has && !force && age < 6 * 3600e3) return c;
+  if (has && force && age < 10 * 60e3) return c;
+  const scan = t => { const m = {}; for (const x of t.matchAll(/\/blog\/(\d{4})\/(\d{2})\/(\d{2})\/this-week-in-rust-(\d+)\//g)) m[x[4]] = x[0]; return m; };
+  let found = {};
+  try{ found = scan(await fetchHTML(LANGS.rs.base + '/blog/archives/index.html')); }catch(e){}
+  if (!Object.keys(found).length){ try{ found = scan(await fetchHTML(LANGS.rs.base + '/atom.xml')); }catch(e){} }
+  if (!Object.keys(found).length && !has) throw new Error('号の一覧を取得できませんでした');
+  c = {t:Date.now(), map:{...c.map, ...found}};
+  store.set('jsw-rs-index', c);
+  return c;
+}
+async function issueUrl(n){
+  const L = LANGS[lang];
+  if (L.kind !== 'twir') return {url: L.base + (n ? '/issues/' + n : '/latest'), n};
+  let idx = await twirIndex(false);
+  if (!n) n = Math.max(...Object.keys(idx.map).map(Number));
+  if (!idx.map[n]) idx = await twirIndex(true);
+  const path = idx.map[n];
+  if (!path) throw Object.assign(new Error('404'), {nf:true});
+  const d = path.match(/(\d{4})\/(\d{2})\/(\d{2})/);
+  return {url: L.base + path, n, date: d ? d[1] + '-' + d[2] + '-' + d[3] : ''};
+}
+
+/* ---------- 解析 ---------- */
+const junk = /unsubscribe|view (this|it) online|view in browser|manage your|preferences|cooperpress|forward this|read on the web|read the web version|prefer to not|email address|happy pythoning|copyright ©|want twir in your inbox|hello and welcome to another|openly developed on github|if you find any errors|subscribe here|let us know if you would like/i;
+const clean = s => s.replace(/\s+/g, ' ').trim();
+const headName = t => { t = clean(t).replace(/:$/, ''); return t === t.toUpperCase() ? t.charAt(0) + t.slice(1).toLowerCase() : t; };
+function linesOf(el){
+  const c = el.cloneNode(true);
+  c.querySelectorAll('br').forEach(b => b.replaceWith('\n'));
+  c.querySelectorAll('p,div,td,tr,li,h1,h2,h3,h4,table').forEach(x => x.append('\n'));
+  return c.textContent.split('\n').map(clean).filter(Boolean);
+}
+function parse(html, kind){
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const root = kind === 'cooper' ? (doc.querySelector('.issue-html, #content, .issue, main') || doc.body)
+             : kind === 'twir' ? (doc.querySelector('.post-content, article, main') || doc.body) : doc.body;
+  const text = root.textContent;
+  const dm = text.match(new RegExp('(' + MONTHS + ')\\s+\\d{1,2},\\s+\\d{4}', 'i'));
+  const date = dm ? dm[0].toLowerCase().replace(/^\w/, c => c.toUpperCase()) : '';
+  const nm = kind === 'twir' ? (doc.title + ' ' + text).match(/This Week in Rust (\d{2,4})/i)
+           : text.match(new RegExp('#(\\d{2,4})\\s*[—–-]\\s*(' + MONTHS + ')', 'i'));
+  const sections = [{name:'トップ', items:[]}];
+  const taken = new Set();
+  const inTaken = el => { for (let p = el.parentElement; p; p = p.parentElement) if (taken.has(p)) return true; return false; };
+  const push = it => { if (it && !junk.test(it.title + ' ' + it.desc)) sections[sections.length - 1].items.push(it); };
+  const head = name => { if (name && !junk.test(name)) sections.push({name, items:[]}); };
+  const walk = fn => { const w = doc.createTreeWalker(root, NodeFilter.SHOW_ELEMENT); for (let el = w.currentNode; el; el = w.nextNode()){ if (!inTaken(el)) fn(el); } };
+
+  if (kind === 'cooper'){
+    walk(el => {
+      const c = (el.className || '') + '', t = el.textContent.trim();
+      if (t && t.length <= 60 && !el.querySelector('a[href*="/link/"]') && (/heading|el-splitbar/i.test(c) || /^H[2-4]$/.test(el.tagName))){ head(headName(t)); taken.add(el); return; }
+      if (/(^|\s)(el-item|item|el-fullitem)(\s|$)/.test(c) && el.querySelector('a[href]')){ taken.add(el); push(cooperItem(el)); return; }
+      if (el.tagName === 'LI' && el.querySelector('a[href]')){ taken.add(el); push(cooperItem(el)); }
+    });
+  } else if (kind === 'pycoders'){
+    const isLink = a => /\/link\//.test(a.getAttribute('href') || '');
+    const hrefs = el => new Set([...el.querySelectorAll('a[href]')].filter(isLink).map(a => a.getAttribute('href'))).size;
+    const blocks = new Set();
+    for (const a of root.querySelectorAll('a[href]')){
+      if (!isLink(a) || a.textContent.trim().length < 3) continue;
+      let b = a;
+      while (b.parentElement && b.parentElement !== root && hrefs(b.parentElement) <= 1 && !b.parentElement.querySelector('h1,h2,h3,h4') && b.parentElement.textContent.length < 1500) b = b.parentElement;
+      blocks.add(b);
+    }
+    walk(el => {
+      if (/^H[1-4]$/.test(el.tagName)){ const t = el.textContent.trim(); if (t && t.length < 70 && !/^#\d/.test(t) && !hrefs(el)){ head(headName(t.replace(/^[^\p{L}\p{N}]+/u, ''))); taken.add(el); } return; }
+      if (blocks.has(el)){ taken.add(el); push(pyItem(el)); }
+    });
+  } else {
+    walk(el => {
+      if (/^H[2-4]$/.test(el.tagName)){ const t = el.textContent.trim(); if (t && t.length < 80){ head(headName(t)); taken.add(el); } return; }
+      if (el.tagName === 'LI'){
+        const a = [...el.querySelectorAll('a[href]')].find(x => !(x.getAttribute('href') || '').startsWith('#') && x.textContent.trim());
+        if (!a) return;
+        taken.add(el);
+        const title = clean(a.textContent);
+        push({title, href: a.getAttribute('href'), desc: clean(el.textContent).replace(title, '').replace(/^[\s|:–—\-]+|[\s|:–—\-]+$/g, ''), author:'', sp:false});
+        return;
+      }
+      if (el.tagName === 'P' && el.textContent.trim().length > 40){
+        taken.add(el);
+        const a = [...el.querySelectorAll('a[href]')].find(x => !(x.getAttribute('href') || '').startsWith('#'));
+        push({title:'', href: a ? a.getAttribute('href') : '', desc: clean(el.textContent), author:'', sp:false});
+      }
+    });
+  }
+  return {date, num: nm ? +nm[1] : 0, sections: sections.filter(s => s.items.length)};
+}
+function cooperItem(el){
+  const a = el.querySelector('.mainlink a, a[href*="/link/"]') || [...el.querySelectorAll('a[href]')].find(x => x.textContent.trim().length > 2);
+  if (!a) return null;
+  const title = clean(a.textContent);
+  const nameEl = el.querySelector('.name, .author');
+  const author = nameEl ? clean(nameEl.textContent) : '';
+  let desc = clean((el.querySelector('.desc') || el).textContent);
+  desc = desc.replace(title, '').replace(author, '').replace(/^[\s—–\-:|]+/, '').replace(/\bsponsor\b\s*$/i, '').trim();
+  const sp = /sponsor/i.test(el.innerHTML.match(/class="[^"]*"/g)?.join(' ') || '') || /\bsponsor\b/i.test(el.textContent.slice(-40));
+  return {title, href: a.getAttribute('href'), desc, author, sp};
+}
+function pyItem(el){
+  const a = [...el.querySelectorAll('a[href*="/link/"]')].find(x => x.textContent.trim().length > 2);
+  if (!a) return null;
+  const title = clean(a.textContent);
+  let sp = false, src = '';
+  const desc = [];
+  for (let L of linesOf(el)){
+    if (/sponsor\s*$/i.test(L)){ sp = true; L = L.replace(/\s*sponsor\s*$/i, '').trim(); if (!L) continue; }
+    if (L.includes(title)){ L = L.replace(title, '').trim(); if (!L) continue; }
+    const [base, ...rest] = L.split('•').map(s => s.trim());
+    if (!src && /[A-Z]/.test(base) && !/[a-z]/.test(base) && base.length < 60){
+      src = (base.includes('.') ? base.toLowerCase() : base.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())) + (rest.length ? ' · ' + rest.join(' · ') : '');
+      continue;
+    }
+    desc.push(L);
+  }
+  return {title, href: a.getAttribute('href'), desc: desc.join(' '), author: src, sp};
+}
+
+/* ---------- 翻訳 ---------- */
+async function initEngine(){
+  try{
+    if ('Translator' in self){
+      const av = await Translator.availability({sourceLanguage:'en', targetLanguage:'ja'});
+      if (av !== 'unavailable'){ engine = 'chrome'; $('#trInfo').textContent = '翻訳エンジン: Chrome内蔵 Translator（端末内・無料・APIキー不要）'; return; }
+    }
+  }catch(e){}
+  engine = 'google';
+  $('#trInfo').textContent = '翻訳エンジン: Google翻訳（非公式エンドポイント、送信先は Google）';
+}
+async function tr(text){
+  if (!text) return '';
+  if (trCache[text]) return trCache[text];
+  let out = '';
+  if (engine === 'chrome'){
+    translator = translator || await Translator.create({sourceLanguage:'en', targetLanguage:'ja'});
+    out = await translator.translate(text);
+  } else {
+    const r = await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ja&dt=t&q=' + encodeURIComponent(text));
+    const j = await r.json();
+    out = j[0].map(s => s[0]).join('');
+  }
+  trCache[text] = out;
+  return out;
+}
+let saveT;
+async function translatePage(i){
+  if (!translating || !data || !data.pages[i]) return;
+  const page = $('#deck').children[i];
+  const q = [...page.querySelectorAll('[data-src]:not([data-done])')];
+  const run = async () => { for (let el; el = q.shift();){
+    el.dataset.done = '1';
+    try{
+      const ja = await tr(el.dataset.src);
+      if (!translating){ delete el.dataset.done; continue; }
+      el.innerHTML = '<span class="ja">' + esc(ja) + '</span><span class="en">' + esc(el.dataset.src) + '</span>';
+    }catch(e){ delete el.dataset.done; $('#trInfo').textContent = '翻訳に失敗: ' + e.message; }
+  }};
+  await Promise.all([run(), run(), run(), run()]);
+  clearTimeout(saveT);
+  saveT = setTimeout(() => { const ks = Object.keys(trCache); if (ks.length > 3000) ks.slice(0, ks.length - 3000).forEach(k => delete trCache[k]); store.set('jsw-trcache', trCache); }, 800);
+}
+function untranslate(){
+  document.querySelectorAll('[data-src][data-done]').forEach(el => { el.textContent = el.dataset.src; delete el.dataset.done; });
+}
+
+/* ---------- 描画 ---------- */
+function card(it){
+  const link = it.title ? '<a class="t" href="' + esc(it.href) + '" target="_blank" rel="noopener" data-src="' + esc(it.title) + '">' + esc(it.title) + '</a>' : '';
+  const desc = it.desc ? '<p data-src="' + esc(it.desc) + '">' + esc(it.desc) + '</p>' : '';
+  const more = !it.title && it.href ? '<a class="more" href="' + esc(it.href) + '" target="_blank" rel="noopener">リンク ↗</a>' : '';
+  const meta = (it.sp || it.author || more) ? '<div class="meta">' + (it.sp ? '<span class="tag">Sponsor</span>' : '') + (it.author ? '<span>' + esc(it.author) + '</span>' : '') + more + '</div>' : '';
+  return '<article class="it">' + link + desc + meta + '</article>';
+}
+const CHUNK = 4; // 長いセクションは4件ずつのページに割る
+function render(){
+  const s = data.sections, pages = [], first = [];
+  s.forEach((x, si) => {
+    const parts = Math.ceil(x.items.length / CHUNK);
+    first[si] = pages.length;
+    for (let k = 0; k < parts; k++) pages.push({si, name:x.name, part:k + 1, parts, total:x.items.length, items:x.items.slice(k * CHUNK, k * CHUNK + CHUNK)});
+  });
+  data.pages = pages; data.first = first;
+  $('#date').textContent = data.date || ' ';
+  $('#tabs').innerHTML = s.map((x, i) => '<button class="tab" data-i="' + i + '">' + esc(x.name) + '</button>').join('');
+  $('#deck').innerHTML = pages.map((x, i) => '<section class="page" data-i="' + i + '"><div><h2>' + esc(x.name) + (x.parts > 1 ? ' <small>' + x.part + '/' + x.parts + '</small>' : '') + '<span>' + x.total + '</span></h2>' + x.items.map(card).join('') + '</div></section>').join('');
+  $('#bars').innerHTML = pages.map((x, i) => '<b data-i="' + i + '" title="' + esc(x.name) + '"><i></i></b>').join('');
+  $('#deck').scrollLeft = 0;
+  cur = 0; mark(); resetTimer();
+  translatePage(0); translatePage(1);
+}
+function stateMsg(html){
+  $('#tabs').innerHTML = '';
+  $('#deck').innerHTML = '<div class="page"><div class="state">' + html + '</div></div>';
+  $('#pos').textContent = '–';
+  $('#bars').innerHTML = '';
+}
+function mark(){
+  const n = data ? data.pages.length : 0;
+  $('#pos').textContent = n ? (cur + 1) + ' / ' + n : '–';
+  const si = n ? data.pages[cur].si : -1;
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('on', i === si));
+  const t = $('#tabs').children[si];
+  if (t) t.scrollIntoView({block:'nearest', inline:'center', behavior:'smooth'});
+}
+function go(i){
+  if (!data) return;
+  i = Math.max(0, Math.min(data.pages.length - 1, i));
+  const d = $('#deck');
+  d.scrollTo({left: i * d.clientWidth, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+}
+function setHead(){
+  const h = '#' + lang + '-' + issue;
+  if (issue && location.hash !== h) history.replaceState(null, '', h);
+  $('#num').textContent = issue ? '#' + issue : '#—';
+}
+
+/* ---------- 号の読み込み ---------- */
+let loadId = 0;
+async function load(n){
+  const id = ++loadId, L = LANGS[lang];
+  data = null;
+  $('#jump').value = '';
+  $('#date').textContent = '読み込み中…';
+  const cached = n ? store.get('jsw-' + lang + '-' + n, null) : null;
+  if (n){ issue = n; setHead(); }
+  stateMsg((n ? '#' + n : '最新号') + ' を読み込み中…');
+  try{
+    let parsed = cached;
+    if (!parsed){
+      const u = await issueUrl(n);
+      parsed = parse(await fetchHTML(u.url), L.kind);
+      if (u.date && !parsed.date) parsed.date = u.date;
+      n = u.n || n;
+      if (!n){ if (!parsed.num) throw new Error('最新号の番号を読み取れませんでした'); n = parsed.num; }
+      if (id !== loadId) return;
+      if (!parsed.sections.length) throw new Error('記事を見つけられませんでした（ページ構造が変わった可能性）');
+      store.set('jsw-' + lang + '-' + n, parsed);
+    }
+    if (id !== loadId) return;
+    issue = n; setHead();
+    store.set('jsw-last-' + lang, n);
+    data = parsed; render();
+  }catch(e){
+    if (id !== loadId) return;
+    setPlaying(false);
+    if (!n){ issue = store.get('jsw-last-' + lang, 0); setHead(); }
+    $('#date').textContent = ' ';
+    if (e.nf) stateMsg('#' + n + ' はまだ公開されていません（最新号まで読み終わりました）。');
+    else showFallback(n, e.message);
+  }
+}
+function setLang(l, n){
+  lang = l; store.set('jsw-lang', l);
+  document.documentElement.dataset.lang = l;
+  $('#lname').textContent = LANGS[l].name;
+  document.title = LANGS[l].name + ' Reader';
+  document.querySelectorAll('.lang').forEach(b => b.setAttribute('aria-pressed', b.dataset.l === l));
+  issue = 0;
+  load(n || store.get('jsw-last-' + l, 0));
+}
+
+/* ---------- フォールバック：元のページをそのまま表示 ---------- */
+let fbUrl = '';
+function originalUrl(n){
+  const L = LANGS[lang];
+  if (L.kind !== 'twir') return L.base + (n ? '/issues/' + n : '/latest');
+  const path = store.get('jsw-rs-index', {map:{}}).map[n];
+  return L.base + (path || (n ? '/blog/archives/index.html' : '/'));
+}
+function viaGoogle(u){
+  const x = new URL(u);
+  return 'https://' + x.host.replace(/-/g, '--').replace(/\./g, '-') + '.translate.goog' + x.pathname + '?_x_tr_sl=en&_x_tr_tl=ja&_x_tr_hl=ja';
+}
+const fbSrc = () => translating ? viaGoogle(fbUrl) : fbUrl;
+let fbMsg = '';
+const BTN_OPEN = '<a class="btn sm" id="fbopen" target="_blank" rel="noopener" aria-label="新しいタブで開く" title="新しいタブで開く（翻訳オンなら日本語）"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>';
+const BTN_RETRY = '<button class="btn sm" id="retry" aria-label="再試行" title="再試行"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>';
+function showFallback(n, msg){
+  fbUrl = originalUrl(n); fbMsg = msg;
+  $('#tabs').innerHTML = ''; $('#bars').innerHTML = ''; $('#pos').textContent = '–';
+  const embed = store.get('jsw-embed-' + lang, false);
+  $('#deck').innerHTML = '<div class="page fb">' + (embed
+    ? '<div class="fbbar"><span title="' + esc(msg) + '">元のページを表示中</span>' + BTN_OPEN + BTN_RETRY + '<button class="btn sm" id="fbhide" aria-label="埋め込みをやめる" title="埋め込みをやめる">×</button></div><iframe id="fbframe" title="元のページ" referrerpolicy="no-referrer"></iframe>'
+    : '<div class="fbcard"><span title="' + esc(msg) + '">取得できませんでした</span>' + BTN_OPEN + '<button class="btn sm" id="fbembed" aria-label="ここに表示" title="ここに表示"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/></svg></button>' + BTN_RETRY + '</div>') + '</div>';
+  const em = $('#fbembed'); if (em) em.onclick = () => { store.set('jsw-embed-' + lang, true); showFallback(n, fbMsg); };
+  const hd = $('#fbhide'); if (hd) hd.onclick = () => { store.set('jsw-embed-' + lang, false); showFallback(n, fbMsg); };
+  $('#retry').onclick = () => load(n);
+  refreshFallback();
+}
+function refreshFallback(){
+  const o = $('#fbopen'); if (o) o.href = fbSrc();
+  const f = $('#fbframe'); if (f) f.src = fbSrc();
+}
+
+/* ---------- 自動再生 ---------- */
+let playing = false, hold = false, elapsed = 0, dur = 0, lastT = 0, spd = store.get('jsw-spd', 1);
+function pageDur(i){
+  const p = data.pages[i], len = p.items.reduce((a, it) => a + (it.title || '').length + (it.desc || '').length, 0);
+  return Math.min(45, Math.max(5, len / [11, 17, 26][spd])) * 1000;
+}
+function paint(){
+  [...$('#bars').children].forEach((b, i) => { b.firstChild.style.transform = 'scaleX(' + (i < cur ? 1 : i > cur ? 0 : Math.min(1, dur ? elapsed / dur : 0)) + ')'; });
+}
+function resetTimer(){ elapsed = 0; dur = data && data.pages ? pageDur(cur) : 0; paint(); }
+function setPlaying(v){ playing = v; $('#play').setAttribute('aria-pressed', v); lastT = performance.now(); }
+function advance(){
+  if (cur < data.pages.length - 1){ cur++; mark(); resetTimer(); go(cur); translatePage(cur + 1); }
+  else { elapsed = 0; load(issue + 1); }
+}
+function tick(t){
+  requestAnimationFrame(tick);
+  const dt = Math.min(t - lastT, 100); lastT = t;
+  if (!playing || hold || document.hidden || !data || !data.pages || document.querySelector('details[open]')) return;
+  elapsed += dt;
+  const b = $('#bars').children[cur]; if (b) b.firstChild.style.transform = 'scaleX(' + Math.min(1, elapsed / dur) + ')';
+  if (elapsed >= dur) advance();
+}
+requestAnimationFrame(t => { lastT = t; tick(t); });
+$('#play').onclick = () => setPlaying(!playing);
+const deck = $('#deck');
+deck.addEventListener('pointerdown', () => { hold = true; });
+['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => deck.addEventListener(ev, () => { hold = false; }));
+const paintSpd = () => document.querySelectorAll('#spd button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.v === spd));
+$('#spd').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; spd = +b.dataset.v; store.set('jsw-spd', spd); paintSpd(); if (data && data.pages){ const f = dur ? elapsed / dur : 0; dur = pageDur(cur); elapsed = f * dur; } });
+paintSpd();
+
+/* ---------- イベント ---------- */
+$('#langs').innerHTML = Object.entries(LANGS).map(([k, v]) => '<button class="lang" data-l="' + k + '" style="--lc:var(--c-' + k + ')" aria-label="' + v.label + '"><i>' + v.mono + '</i><span>' + v.label + '</span></button>').join('');
+$('#langs').addEventListener('click', e => { const b = e.target.closest('.lang'); if (b && b.dataset.l !== lang) setLang(b.dataset.l); });
+$('#latest').onclick = () => load(0);
+let st;
+$('#deck').addEventListener('scroll', e => {
+  clearTimeout(st);
+  st = setTimeout(() => {
+    const d = e.target, i = Math.round(d.scrollLeft / d.clientWidth);
+    if (data && i !== cur){ cur = i; mark(); resetTimer(); translatePage(i); translatePage(i + 1); }
+  }, 80);
+});
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('.tab'); if (b && data) go(data.first[+b.dataset.i]); });
+$('#bars').addEventListener('click', e => { const b = e.target.closest('b'); if (b) go(+b.dataset.i); });
+$('#prev').onclick = () => issue > 1 && load(issue - 1);
+$('#back').onclick = () => go(cur - 1);
+$('#fwd').onclick = () => go(cur + 1);
+$('#next').onclick = () => issue && load(issue + 1);
+$('#jump').addEventListener('keydown', e => { if (e.key === 'Enter'){ const v = parseInt(e.target.value); if (v > 0) load(v); } });
+$('#tr').onclick = () => {
+  translating = !translating; store.set('jsw-tr', translating);
+  $('#tr').setAttribute('aria-pressed', translating);
+  if (translating){ translatePage(cur); translatePage(cur + 1); } else untranslate();
+  refreshFallback();
+};
+$('#px').value = proxies.join('\n');
+$('#px').addEventListener('change', e => {
+  proxies = e.target.value.split('\n').map(s => s.trim()).filter(s => s.includes('{url}'));
+  if (!proxies.length) proxies = DEF_PROXIES;
+  store.set('jsw-proxies', proxies);
+});
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input,textarea')) return;
+  if (e.key === 'ArrowRight'){ e.preventDefault(); go(cur + 1); }
+  else if (e.key === 'ArrowLeft'){ e.preventDefault(); go(cur - 1); }
+  else if (e.key === ']' && issue) load(issue + 1);
+  else if (e.key === '[' && issue > 1) load(issue - 1);
+  else if (e.key === 't' || e.key === 'T') $('#tr').click();
+  else if (e.key === ' '){ e.preventDefault(); setPlaying(!playing); }
+});
+addEventListener('hashchange', () => { const h = fromHash(); if (!h) return; if (h.lang !== lang) setLang(h.lang, h.n); else if (h.n && h.n !== issue) load(h.n); });
+addEventListener('resize', () => { if (data) $('#deck').scrollLeft = cur * $('#deck').clientWidth; });
+
+const applyTheme = t => { document.documentElement.dataset.theme = t; };
+applyTheme(store.get('jsw-theme', matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+$('#theme').onclick = () => { const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; applyTheme(t); store.set('jsw-theme', t); };
+$('#tr').setAttribute('aria-pressed', translating);
+initEngine();
+setLang(lang, fromHash()?.n);
+}
+</script>
+</body>
+</html>
