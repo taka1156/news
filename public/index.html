@@ -2,13 +2,13 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<script>/* 描画前にテーマと言語色を当てる（起動時のちらつき防止） */try{var t=JSON.parse(localStorage.getItem("jsw-theme"));if(t)document.documentElement.dataset.theme=t;var g=JSON.parse(localStorage.getItem("jsw-lang"));if(g)document.documentElement.dataset.lang=g}catch(e){}if(navigator.standalone)document.documentElement.classList.add("standalone")</script>
+<script>/* 描画前にテーマと言語色を当てる（起動時のちらつき防止） */try{var t=JSON.parse(localStorage.getItem("jsw-theme"));if(t)document.documentElement.dataset.theme=t;var g=JSON.parse(localStorage.getItem("jsw-lang"));if(g)document.documentElement.dataset.lang=g}catch(e){}if(navigator.standalone)document.documentElement.classList.add("standalone");try{var u=JSON.parse(localStorage.getItem("jsw-ui"));document.documentElement.lang=u||((navigator.language||"").toLowerCase().indexOf("ja")===0?"ja":"en")}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="JavaScript Weekly・Go Weekly・PyCoder's Weekly・This Week in Rust・Ruby Weekly を、セクションごとにめくって読めるリーダー。">
+<meta name="description" content="A reader for JavaScript Weekly, Go Weekly, Ruby Weekly, PyCoder's Weekly and This Week in Rust — flip through each issue section by section.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Weekly Reader">
 <meta property="og:title" content="Weekly Reader">
-<meta property="og:description" content="JavaScript Weekly・Go Weekly・PyCoder's Weekly・This Week in Rust・Ruby Weekly を、セクションごとにめくって読めるリーダー。">
+<meta property="og:description" content="A reader for JavaScript Weekly, Go Weekly, Ruby Weekly, PyCoder's Weekly and This Week in Rust — flip through each issue section by section.">
 <meta property="og:url" content="https://news.taka1156.site/">
 <meta property="og:image" content="https://news.taka1156.site/og.png">
 <meta property="og:image:width" content="1200">
@@ -17,7 +17,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Weekly Reader">
-<meta name="version" content="2026-11-25.28">
+<meta name="version" content="2026-11-25.29">
 <title>Weekly Reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -239,43 +239,46 @@ footer .btn{height:40px}
 <body>
 <div id="splash" aria-hidden="true" class="notranslate" translate="no"><span>Weekly Reader</span></div>
 <div id="cred" class="sheet notranslate" translate="no" role="dialog" aria-modal="true" aria-labelledby="credTitle" hidden>
-  <div class="sheet-hd wrap"><h2 id="credTitle">出典</h2><button class="btn ic" id="credClose" aria-label="閉じる"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="sheet-hd wrap"><h2 id="credTitle" data-i18n="credits.title"></h2><button class="btn ic" id="credClose" data-i18n-aria="credits.close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="sheet-bd wrap" id="credBody"></div>
 </div>
 <div class="app">
-  <nav class="tabs" id="tabs" aria-label="セクション"></nav>
+  <nav class="tabs" id="tabs" data-i18n-aria="nav.sections"></nav>
   <header class="hd wrap notranslate" translate="no">
     <span class="logo" aria-label="Weekly Reader">Weekly Reader</span>
     <span class="sp"></span>
-    <details class="lp"><summary class="btn lsel" aria-label="言語を選ぶ"><span id="lmono">JS</span><span id="num">#—</span><time id="date"></time><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></summary><div class="lmenu" id="langs" role="group" aria-label="言語"></div></details>
+    <details class="lp"><summary class="btn lsel" data-i18n-aria="header.chooseLang"><span id="lmono">JS</span><span id="num">#—</span><time id="date"></time><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></summary><div class="lmenu" id="langs" role="group" aria-label="言語"></div></details>
     <details class="sd">
-      <summary class="btn ic" id="setbtn" aria-label="設定"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></summary>
+      <summary class="btn ic" id="setbtn" data-i18n-aria="header.settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></summary>
       <div class="set">
         <h1><span id="lname">JavaScript Weekly</span></h1>
-        <button class="btn thm" id="theme" aria-label="ライト/ダーク切替"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="th-moon" d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/><g class="th-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg><span>ライト / ダーク</span></button>
-        <label for="jump">号へ移動</label>
-        <div class="row"><input id="jump" inputmode="numeric" placeholder="号数で移動"><button class="btn" id="latest">最新</button></div>
-        <label>自動再生の速さ</label>
-        <div class="seg" id="spd"><button data-v="0">ゆっくり</button><button data-v="1">ふつう</button><button data-v="2">はやい</button></div>
-        <p style="font-size:12px">バージョン 2026-11-25.28</p>
-        <p>？ボタンで使い方ツアー。キー操作：Space 再生／← → セクション／[ ] 号。カードを押している間は一時停止。</p>
+        <button class="btn thm" id="theme" data-i18n-aria="settings.themeAria"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="th-moon" d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/><g class="th-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg><span data-i18n="settings.theme"></span></button>
+        <label data-i18n="settings.uiLang"></label>
+        <div class="seg" id="uil"><button data-l="ja">日本語</button><button data-l="en">English</button></div>
+        <label for="jump" data-i18n="settings.jump"></label>
+        <div class="row"><input id="jump" inputmode="numeric" data-i18n-ph="settings.jumpPh"><button class="btn" id="latest" data-i18n="settings.latest"></button></div>
+        <label data-i18n="settings.speed"></label>
+        <div class="seg" id="spd"><button data-v="0" data-i18n="settings.slow"></button><button data-v="1" data-i18n="settings.normal"></button><button data-v="2" data-i18n="settings.fast"></button></div>
+        <p style="font-size:12px"><span data-i18n="settings.version"></span> <span id="ver">2026-11-25.29</span></p>
+        <p data-i18n="settings.keys"></p>
       </div>
     </details>
   </header>
   <div class="prog wrap notranslate" translate="no"><div class="bars" id="bars"></div><span id="pos">–</span></div>
-  <main class="deck" id="deck"><div class="page"><div class="state">読み込み中…</div></div></main>
-  <nav class="bar wrap notranslate" translate="no" aria-label="操作">
+  <main class="deck" id="deck"><div class="page"><div class="state" data-i18n="loading"></div></div></main>
+  <nav class="bar wrap notranslate" translate="no" data-i18n-aria="nav.label">
     <span class="sp"></span>
-    <button class="btn ic" id="prev" aria-label="前の号" title="前の号 ["><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5l-7 7 7 7M19 5l-7 7 7 7"/></svg></button>
-    <button class="btn ic" id="back" aria-label="前のセクション" title="前のセクション ←"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-    <button class="btn ic play" id="play" aria-pressed="false" aria-label="自動再生" title="自動再生 (Space)"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="pl" d="M8 5.5v13a1 1 0 0 0 1.5.9l10-6.5a1 1 0 0 0 0-1.7l-10-6.5A1 1 0 0 0 8 5.5z"/><g class="pa"><rect x="6.5" y="5" width="4" height="14" rx="1.5"/><rect x="13.5" y="5" width="4" height="14" rx="1.5"/></g></svg></button>
-    <button class="btn ic" id="fwd" aria-label="次のセクション" title="次のセクション →"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
-    <button class="btn ic" id="next" aria-label="次の号" title="次の号 ]"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l7 7-7 7M12 5l7 7-7 7"/></svg></button>
+    <button class="btn ic" id="prev" data-i18n-aria="nav.prev" data-i18n-title="nav.prev" data-key="["><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5l-7 7 7 7M19 5l-7 7 7 7"/></svg></button>
+    <button class="btn ic" id="back" data-i18n-aria="nav.back" data-i18n-title="nav.back" data-key="←"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button class="btn ic play" id="play" aria-pressed="false" data-i18n-aria="nav.play" data-i18n-title="nav.play" data-key="Space"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="pl" d="M8 5.5v13a1 1 0 0 0 1.5.9l10-6.5a1 1 0 0 0 0-1.7l-10-6.5A1 1 0 0 0 8 5.5z"/><g class="pa"><rect x="6.5" y="5" width="4" height="14" rx="1.5"/><rect x="13.5" y="5" width="4" height="14" rx="1.5"/></g></svg></button>
+    <button class="btn ic" id="fwd" data-i18n-aria="nav.fwd" data-i18n-title="nav.fwd" data-key="→"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+    <button class="btn ic" id="next" data-i18n-aria="nav.next" data-i18n-title="nav.next" data-key="]"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l7 7-7 7M12 5l7 7-7 7"/></svg></button>
     <span class="sp"></span>
-    <button class="btn ic" id="credits" aria-label="出典" title="出典"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7h6"/></svg></button>
-    <button class="btn ic" id="help" aria-label="使い方" title="使い方"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></svg></button>
+    <button class="btn ic" id="credits" data-i18n-aria="nav.credits" data-i18n-title="nav.credits"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7h6"/></svg></button>
+    <button class="btn ic" id="help" data-i18n-aria="nav.help" data-i18n-title="nav.help"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></svg></button>
   </nav>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/23.16.8/i18next.min.js"></script>
 <script>
 {
 const $ = s => document.querySelector(s);
@@ -284,6 +287,38 @@ const store = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 };
+/* ---------- 表示言語（i18next + public/locales/*.json） ---------- */
+const UI_LANGS = ['ja', 'en'];
+let uiLang = store.get('jsw-ui', (navigator.language || '').toLowerCase().startsWith('ja') ? 'ja' : 'en');
+if (!UI_LANGS.includes(uiLang)) uiLang = 'en';
+const bundles = {};
+// i18next を読み込めなかったときの最小限の代わり（キーをたどって {{x}} を差し込むだけ）
+const lookup = (k, o) => { let v = k.split('.').reduce((a, p) => a && a[p], bundles[uiLang] || {}); if (typeof v !== 'string') v = k; return v.replace(/\{\{(\w+)\}\}/g, (_, x) => o && o[x] != null ? o[x] : ''); };
+const t = (k, o) => window.i18next && i18next.isInitialized ? i18next.t(k, o) : lookup(k, o);
+async function loadBundle(l){
+  if (bundles[l]) return bundles[l];
+  try{ const r = await fetch('/locales/' + l + '.json', {cache: 'no-cache'}); if (r.ok) bundles[l] = await r.json(); }catch(e){}
+  return bundles[l] || {};
+}
+function applyI18n(root = document){
+  root.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  root.querySelectorAll('[data-i18n-aria]').forEach(el => el.setAttribute('aria-label', t(el.dataset.i18nAria)));
+  root.querySelectorAll('[data-i18n-title]').forEach(el => el.setAttribute('title', t(el.dataset.i18nTitle) + (el.dataset.key ? ' (' + el.dataset.key + ')' : '')));
+  root.querySelectorAll('[data-i18n-ph]').forEach(el => el.setAttribute('placeholder', t(el.dataset.i18nPh)));
+  document.querySelectorAll('#uil button').forEach(b => b.setAttribute('aria-pressed', b.dataset.l === uiLang));
+}
+async function setUiLang(l){
+  uiLang = l; store.set('jsw-ui', l);
+  const res = await loadBundle(l);
+  if (window.i18next){
+    if (!i18next.isInitialized) await i18next.init({lng: l, resources: {[l]: {translation: res}}, interpolation: {escapeValue: false}, returnNull: false});
+    else { i18next.addResourceBundle(l, 'translation', res, true, true); await i18next.changeLanguage(l); }
+  }
+  document.documentElement.lang = l;
+  applyI18n();
+}
+const secName = n => !n || n === 'トップ' ? t('card.top') : n;
+
 const LANGS = {
   js: {label:'JavaScript', mono:'JS', name:'JavaScript Weekly', kind:'cooper',   base:'https://javascriptweekly.com', fb:812},
   go: {label:'Go',         mono:'Go', name:'Go Weekly',         kind:'cooper',   base:'https://golangweekly.com',     fb:625},
@@ -307,19 +342,19 @@ try{ ['jsw-tr', 'jsw-trcache'].forEach(k => localStorage.removeItem(k)); }catch(
 let lastFinal = '';
 // 記事ページは同じ場所の Worker（/proxy）経由で取る。15秒でタイムアウト
 async function fetchHTML(url){
-  if (!/^https?:$/.test(location.protocol)) throw new Error('Worker 上で開いてください（ファイルを直接開くと記事を取れません）');
+  if (!/^https?:$/.test(location.protocol)) throw new Error(t('err.openOnWorker'));
   const c = new AbortController(), to = setTimeout(() => c.abort(), 15000);
   try{
     const r = await fetch('/proxy?url=' + encodeURIComponent(url), {signal: c.signal});
     // Worker が無い場所に置いた場合の 404 は「号が無い」扱いにしない
     if (r.status === 404 && r.headers.get('x-weekly-proxy')) throw Object.assign(new Error('404'), {nf:true});
-    if (!r.ok) throw new Error(r.status === 404 ? 'Worker の /proxy が見つかりません' : 'HTTP ' + r.status);
-    const t = await r.text();
-    if (t.length < 500) throw new Error('空のレスポンス');
+    if (!r.ok) throw new Error(r.status === 404 ? t('err.noProxy') : 'HTTP ' + r.status);
+    const body = await r.text();
+    if (body.length < 500) throw new Error(t('err.empty'));
     lastFinal = r.headers.get('x-final-url') || '';
-    return t;
+    return body;
   }catch(e){
-    throw e.name === 'AbortError' ? new Error('タイムアウト') : e.nf ? e : new Error(e.message === 'Failed to fetch' ? '接続できません' : e.message);
+    throw e.name === 'AbortError' ? new Error(t('err.timeout')) : e.nf ? e : new Error(e.message === 'Failed to fetch' ? t('err.offline') : e.message);
   }finally{ clearTimeout(to); }
 }
 // This Week in Rust は URL に日付が入るので、号数→URL の対応表を作る
@@ -332,7 +367,7 @@ async function twirIndex(force){
   let found = {};
   try{ found = scan(await fetchHTML(LANGS.rs.base + '/blog/archives/index.html')); }catch(e){}
   if (!Object.keys(found).length){ try{ found = scan(await fetchHTML(LANGS.rs.base + '/atom.xml')); }catch(e){} }
-  if (!Object.keys(found).length && !has) throw new Error('号の一覧を取得できませんでした');
+  if (!Object.keys(found).length && !has) throw new Error(t('err.noIndex'));
   c = {t:Date.now(), map:{...c.map, ...found}};
   store.set('jsw-rs-index', c);
   return c;
@@ -372,7 +407,7 @@ function parse(html, kind){
   const date = dm ? dm[0].toLowerCase().replace(/^\w/, c => c.toUpperCase()) : '';
   const nm = kind === 'twir' ? (doc.title + ' ' + text).match(/This Week in Rust (\d{2,4})/i)
            : (text.match(new RegExp('#\\s*(\\d{2,4})\\s*[—–-]\\s*(' + MONTHS + ')', 'i')) || text.match(/Issue\s+\d+\s*#\s*(\d{2,4})/i));
-  const sections = [{name:'トップ', items:[]}];
+  const sections = [{name:'', items:[]}]; // 見出しより前の記事（表示名は表示言語の「トップ」）
   const taken = new Set();
   const inTaken = el => { for (let p = el.parentElement; p; p = p.parentElement) if (taken.has(p)) return true; return false; };
   const push = it => { if (it && !junk.test(it.title + ' ' + it.desc)) sections[sections.length - 1].items.push(it); };
@@ -495,7 +530,7 @@ window.WR_DEBUG = {parse, LANGS, get data(){ return data; }};
 function card(it){
   const link = it.title ? '<a class="t" href="' + esc(it.href) + '" target="_blank" rel="noopener" data-src="' + esc(it.title) + '">' + esc(it.title) + '</a>' : '';
   const desc = it.desc ? '<p data-src="' + esc(it.desc) + '">' + esc(it.desc) + '</p>' : '';
-  const more = !it.title && it.href ? '<a class="more" href="' + esc(it.href) + '" target="_blank" rel="noopener">リンク ↗</a>' : '';
+  const more = !it.title && it.href ? '<a class="more" href="' + esc(it.href) + '" target="_blank" rel="noopener">' + esc(t('card.link')) + '</a>' : '';
   const meta = (it.sp || it.author || more) ? '<div class="meta">' + (it.sp ? '<span class="tag notranslate" translate="no">Sponsor</span>' : '') + (it.author ? '<span>' + esc(it.author) + '</span>' : '') + more + '</div>' : '';
   const img = it.img ? '<img class="th" src="' + esc(it.img) + '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">' : '';
   return '<article class="it' + (it.img ? ' has-img' : '') + '">' + img + link + desc + meta + '</article>';
@@ -512,14 +547,14 @@ function render(keep){
   const s = data.sections, deck = $('#deck'), pages = [], first = [], tpl = document.createElement('template');
   const fd = fmtDate(data.date);
   $('#date').textContent = fd ? fd.slice(5) : ''; $('#date').title = fd;
-  $('#tabs').innerHTML = s.map((x, i) => '<button class="tab" data-i="' + i + '">' + esc(x.name) + '</button>').join('');
+  $('#tabs').innerHTML = s.map((x, i) => '<button class="tab" data-i="' + i + '">' + esc(secName(x.name)) + '</button>').join('');
   deck.innerHTML = '';
   s.forEach((x, si) => {
     first[si] = pages.length;
     let pg, box, items;
     const open = () => {
       pg = document.createElement('section'); pg.className = 'page'; pg.lang = 'en'; // 記事は英語（ブラウザの翻訳が英語として扱う）
-      pg.innerHTML = '<div><h2>' + esc(x.name) + '<small></small><span>' + x.items.length + '</span></h2></div>';
+      pg.innerHTML = '<div><h2>' + esc(secName(x.name)) + '<small></small><span>' + x.items.length + '</span></h2></div>';
       deck.append(pg); box = pg.firstChild; items = [];
       pages.push({si, name:x.name, total:x.items.length, items, el:pg});
     };
@@ -538,7 +573,7 @@ function render(keep){
     if (same.length > 1) p.el.querySelector('h2 small').textContent = (same.indexOf(p) + 1) + '/' + same.length;
   });
   data.pages = pages.map(({el, ...rest}) => rest); data.first = first;
-  $('#bars').innerHTML = pages.map((x, i) => '<b data-i="' + i + '" title="' + esc(x.name) + '"><i></i></b>').join('');
+  $('#bars').innerHTML = pages.map((x, i) => '<b data-i="' + i + '" title="' + esc(secName(x.name)) + '"><i></i></b>').join('');
   $('#bars').classList.toggle('many', pages.length > 40);
   const start = keep ? Math.max(0, data.pages.findIndex(p => p.items.includes(keep))) : 0;
   deck.scrollLeft = start * deck.clientWidth;
@@ -602,7 +637,7 @@ async function load(n){
   $('#date').textContent = '';
   const cached = n ? store.get('jsw-' + lang + '-' + n, null) : null;
   if (n){ issue = n; setHead(); }
-  stateMsg((n ? '#' + n : '最新号') + ' を読み込み中…');
+  stateMsg(esc(t('state.loadingIssue', {what: n ? '#' + n : t('state.latestIssue')})));
   try{
     let parsed = cached;
     if (!parsed){
@@ -617,10 +652,10 @@ async function load(n){
       if (!n){
         const fm = lastFinal.match(/\/issues\/(\d+)/);
         n = parsed.num || (fm ? +fm[1] : 0);
-        if (!n) throw new Error('最新号の番号を読み取れませんでした');
+        if (!n) throw new Error(t('err.noLatestNum'));
       }
       if (id !== loadId) return;
-      if (!parsed.sections.length) throw new Error('記事を見つけられませんでした（ページ構造が変わった可能性）');
+      if (!parsed.sections.length) throw new Error(t('err.noArticles'));
       store.set('jsw-' + lang + '-' + n, parsed);
     }
     if (id !== loadId) return;
@@ -640,12 +675,12 @@ async function load(n){
     if (prev && prev.lang === lang && n > prev.issue && (e.nf || !latest || n > latest)){
       issue = prev.issue; data = prev.data; setHead(); render(); go(prev.cur);
       if (issue > latest) store.set('jsw-latest-' + lang, issue);
-      toast('#' + issue + ' が最新号です');
+      toast(t('state.isLatest', {n: issue}));
       return;
     }
     if (!n){ issue = store.get('jsw-last-' + lang, 0); setHead(); }
     $('#date').textContent = '';
-    if (e.nf) stateMsg('#' + n + ' はまだ公開されていません（最新号まで読み終わりました）。');
+    if (e.nf) stateMsg(esc(t('state.notPublished', {n})));
     else showFallback(n, e.message);
     hideSplash();
   }
@@ -672,15 +707,15 @@ function originalUrl(n){
 }
 const fbSrc = () => fbUrl;
 let fbMsg = '';
-const BTN_OPEN = '<a class="btn sm" id="fbopen" target="_blank" rel="noopener" aria-label="新しいタブで開く" title="新しいタブで開く"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>';
-const BTN_RETRY = '<button class="btn sm" id="retry" aria-label="再試行" title="再試行"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>';
+const BTN_OPEN = () => '<a class="btn sm" id="fbopen" target="_blank" rel="noopener" aria-label="' + esc(t('fb.open')) + '" title="' + esc(t('fb.open')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>';
+const BTN_RETRY = () => '<button class="btn sm" id="retry" aria-label="' + esc(t('fb.retry')) + '" title="' + esc(t('fb.retry')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>';
 function showFallback(n, msg){
   fbUrl = originalUrl(n); fbMsg = msg;
   $('#tabs').innerHTML = ''; $('#bars').innerHTML = ''; $('#pos').textContent = '–';
   const embed = store.get('jsw-embed-' + lang, false);
   $('#deck').innerHTML = '<div class="page fb">' + (embed
-    ? '<div class="fbbar notranslate" translate="no"><span title="' + esc(msg) + '">元のページを表示中</span>' + BTN_OPEN + BTN_RETRY + '<button class="btn sm" id="fbhide" aria-label="埋め込みをやめる" title="埋め込みをやめる">×</button></div><iframe id="fbframe" title="元のページ" referrerpolicy="no-referrer"></iframe>'
-    : '<div class="fbcard notranslate" translate="no"><span title="' + esc(msg) + '">取得できませんでした<small>' + esc(msg.split('\n')[0]) + '</small></span>' + BTN_OPEN + '<button class="btn sm" id="fbembed" aria-label="ここに表示" title="ここに表示"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/></svg></button>' + BTN_RETRY + '</div>') + '</div>';
+    ? '<div class="fbbar notranslate" translate="no"><span title="' + esc(msg) + '">' + esc(t('fb.showing')) + '</span>' + BTN_OPEN() + BTN_RETRY() + '<button class="btn sm" id="fbhide" aria-label="' + esc(t('fb.unembed')) + '" title="' + esc(t('fb.unembed')) + '">×</button></div><iframe id="fbframe" title="' + esc(t('fb.frame')) + '" referrerpolicy="no-referrer"></iframe>'
+    : '<div class="fbcard notranslate" translate="no"><span title="' + esc(msg) + '">' + esc(t('fb.failed')) + '<small>' + esc(msg.split('\n')[0]) + '</small></span>' + BTN_OPEN() + '<button class="btn sm" id="fbembed" aria-label="' + esc(t('fb.embed')) + '" title="' + esc(t('fb.embed')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/></svg></button>' + BTN_RETRY() + '</div>') + '</div>';
   const em = $('#fbembed'); if (em) em.onclick = () => { store.set('jsw-embed-' + lang, true); showFallback(n, fbMsg); };
   const hd = $('#fbhide'); if (hd) hd.onclick = () => { store.set('jsw-embed-' + lang, false); showFallback(n, fbMsg); };
   $('#retry').onclick = () => load(n);
@@ -700,7 +735,7 @@ function toast(msg){
 }
 
 /* ---------- 使い方ツアー（Driver.js を必要なときだけ読み込む） ---------- */
-const DRIVER = 'https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/';
+const DRIVER = 'https://cdnjs.cloudflare.com/ajax/libs/driver.js/1.3.1/';
 let driverReady;
 function loadDriver(){
   if (driverReady) return driverReady;
@@ -716,18 +751,18 @@ async function startTour(){
   setPlaying(false);
   document.querySelectorAll('details[open]').forEach(d => d.open = false);
   let driver;
-  try{ driver = await loadDriver(); }catch(e){ toast('ツアーを読み込めませんでした'); return; }
+  try{ driver = await loadDriver(); }catch(e){ toast(t('tour.loadFail')); return; }
   const steps = [
-    {element:'#deck', popover:{title:'記事', description:'左右にスワイプ（または ← →）でページをめくります。'}},
-    {element:'#bars', popover:{title:'進み具合', description:'この号のどこを読んでいるか。線を押すとそのページへ飛びます。'}},
-    {element:'.lsel', popover:{title:'言語・号・日付', description:'押すと JS / Go / Py / Rs / Rb を切り替えられます。'}},
-    {element:'#prev', popover:{title:'号を移動', description:'« で1つ古い号、» で1つ新しい号へ。'}},
-    {element:'#back', popover:{title:'ページを移動', description:'‹ › で前後のページへ。'}},
-    {element:'#play', popover:{title:'自動再生', description:'文字量に合わせて自動でめくり、号の最後で次の号へ進みます。記事を押している間は一時停止。'}},
-    {element:'#credits', popover:{title:'出典', description:'各ニュースレターの発行元・ライセンス・元の号へのリンク。掲載についての連絡先もここにあります。'}},
-    {element:'#setbtn', popover:{title:'設定', description:'号数で移動、最新号、自動再生の速さ、ライト / ダークの切り替えなど。'}}
+    {element:'#deck', popover:{title:t('tour.deck.title'), description:t('tour.deck.desc')}},
+    {element:'#bars', popover:{title:t('tour.bars.title'), description:t('tour.bars.desc')}},
+    {element:'.lsel', popover:{title:t('tour.lang.title'), description:t('tour.lang.desc')}},
+    {element:'#prev', popover:{title:t('tour.prev2.title'), description:t('tour.prev2.desc')}},
+    {element:'#back', popover:{title:t('tour.back.title'), description:t('tour.back.desc')}},
+    {element:'#play', popover:{title:t('tour.play.title'), description:t('tour.play.desc')}},
+    {element:'#credits', popover:{title:t('tour.credits.title'), description:t('tour.credits.desc')}},
+    {element:'#setbtn', popover:{title:t('tour.settings.title'), description:t('tour.settings.desc')}}
   ].filter(st => { const el = document.querySelector(st.element); return el && el.offsetParent !== null; });
-  driver({showProgress:true, progressText:'{{current}} / {{total}}', nextBtnText:'次へ', prevBtnText:'戻る', doneBtnText:'閉じる', popoverClass:'wr-tour', steps}).drive();
+  driver({showProgress:true, progressText:'{{current}} / {{total}}', nextBtnText:t('tour.next'), prevBtnText:t('tour.prev'), doneBtnText:t('tour.done'), popoverClass:'wr-tour', steps}).drive();
 }
 $('#help').onclick = startTour;
 
@@ -738,26 +773,28 @@ const CREDITS = {
   go: {...COOPER, archive:'/issues', rss:'/rss'},
   rb: {...COOPER, archive:'/issues', rss:'/rss'},
   py: {pub:"PyCoder's Weekly", lic:"© PyCoder's Weekly", archive:'/issues', rss:'/feed'},
-  rs: {pub:'This Week in Rust（Rust コミュニティ）', lic:'CC BY-SA', licUrl:'https://github.com/rust-lang/this-week-in-rust', archive:'/blog/archives/index.html', rss:'/rss.xml'}
+  rs: {pubKey:'credits.rustCommunity', lic:'CC BY-SA', licUrl:'https://github.com/rust-lang/this-week-in-rust', archive:'/blog/archives/index.html', rss:'/rss.xml'}
 };
 const ISSUES_URL = 'https://github.com/taka1156/news/issues/new';
 const A = (href, text) => '<a href="' + esc(href) + '" target="_blank" rel="noopener">' + esc(text) + '</a>';
 function openCredits(){
   closeMenus(); setPlaying(false);
-  const L = LANGS[lang], now = issue ? '<div class="now">' + esc(L.name) + ' #' + issue + (data && data.date ? '（' + esc(fmtDate(data.date)) + '）' : '') + '<br>' + A(originalUrl(issue), '元の号を開く ↗') + '</div>' : '';
+  const T = k => esc(t(k));
+  const L = LANGS[lang], now = issue ? '<div class="now">' + esc(L.name) + ' #' + issue + (data && data.date ? ' (' + esc(fmtDate(data.date)) + ')' : '') + '<br>' + A(originalUrl(issue), t('credits.openOriginal')) + '</div>' : '';
   const order = ['js', 'go', 'rb', 'py', 'rs'].filter(k => LANGS[k]);
+  const sep = T('credits.listSep');
   $('#credBody').innerHTML =
-    '<h3>今読んでいる号</h3>' + (now || '<p>まだ読み込まれていません。</p>') +
-    '<h3>このサイトについて</h3><p>Weekly Reader は、以下の技術ニュースレターを読みやすく表示する非公式のリーダーです。各発行元とは関係ありません。掲載内容の権利は各発行元と、紹介されている記事の著者にあります。</p>' +
-    '<h3>ニュースレター</h3>' + order.map(k => {
+    '<h3>' + T('credits.current') + '</h3>' + (now || '<p>' + T('credits.notLoaded') + '</p>') +
+    '<h3>' + T('credits.about') + '</h3><p>' + T('credits.aboutText') + '</p>' +
+    '<h3>' + T('credits.newsletters') + '</h3>' + order.map(k => {
       const v = LANGS[k], c = CREDITS[k];
       return '<div class="cr" style="--lc:var(--c-' + k + ')"><b>' + esc(v.name) + '</b>' +
-        '<div>発行：' + esc(c.pub) + '</div>' +
-        '<div class="lk">' + A(v.base + '/', 'サイト') + A(v.base + c.archive, 'アーカイブ') + A(v.base + c.rss, 'RSS') + '</div>' +
-        '<div class="lic">' + (c.licUrl ? 'ライセンス：' + A(c.licUrl, c.lic) : esc(c.lic)) + '</div></div>';
+        '<div>' + esc(t('credits.publisher', {pub: c.pubKey ? t(c.pubKey) : c.pub})) + '</div>' +
+        '<div class="lk">' + A(v.base + '/', t('credits.site')) + A(v.base + c.archive, t('credits.archive')) + A(v.base + c.rss, t('credits.rss')) + '</div>' +
+        '<div class="lic">' + (c.licUrl ? T('credits.license') + A(c.licUrl, c.lic) : esc(c.lic)) + '</div></div>';
     }).join('') +
-    '<h3>フォントとライブラリ</h3><p>' + A('https://fonts.google.com/specimen/Instrument+Serif', 'Instrument Serif') + '、' + A('https://fonts.google.com/specimen/Inter', 'Inter') + '、' + A('https://fonts.google.com/noto/specimen/Noto+Sans+JP', 'Noto Sans JP') + '（' + A('https://openfontlicense.org/', 'SIL Open Font License') + '）<br>' + A('https://github.com/kamranahmedse/driver.js', 'Driver.js') + '（MIT License）</p>' +
-    '<h3>連絡先</h3><p>掲載の停止・修正などのご連絡は、' + A(ISSUES_URL, 'GitHub の Issue') + 'からお願いします。</p>';
+    '<h3>' + T('credits.fonts') + '</h3><p>' + A('https://fonts.google.com/specimen/Instrument+Serif', 'Instrument Serif') + sep + A('https://fonts.google.com/specimen/Inter', 'Inter') + sep + A('https://fonts.google.com/noto/specimen/Noto+Sans+JP', 'Noto Sans JP') + ' (' + A('https://openfontlicense.org/', 'SIL Open Font License') + ')<br>' + A('https://github.com/kamranahmedse/driver.js', 'Driver.js') + ' (MIT License)</p>' +
+    '<h3>' + T('credits.contact') + '</h3><p>' + T('credits.contactBefore') + A(ISSUES_URL, t('credits.contactLink')) + T('credits.contactAfter') + '</p>';
   $('#cred').hidden = false;
   $('#credClose').focus();
 }
@@ -797,6 +834,11 @@ deck.addEventListener('pointerdown', () => { hold = true; });
 const paintSpd = () => document.querySelectorAll('#spd button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.v === spd));
 $('#spd').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; spd = +b.dataset.v; store.set('jsw-spd', spd); paintSpd(); if (data && data.pages){ const f = dur ? elapsed / dur : 0; dur = pageDur(cur); elapsed = f * dur; } });
 paintSpd();
+$('#uil').addEventListener('click', async e => {
+  const b = e.target.closest('button'); if (!b || b.dataset.l === uiLang) return;
+  await setUiLang(b.dataset.l);
+  if (data && data.pages){ render(keepItem()); }
+});
 
 /* ---------- イベント ---------- */
 $('#langs').innerHTML = Object.entries(LANGS).map(([k, v]) => '<button class="lang" data-l="' + k + '" style="--lc:var(--c-' + k + ')" aria-label="' + v.label + '"><i>' + v.mono + '</i><span>' + v.label + '</span></button>').join('');
@@ -848,7 +890,7 @@ if (document.fonts) document.fonts.ready.then(() => { if (fontsLate && data && d
 const applyTheme = t => { document.documentElement.dataset.theme = t; };
 applyTheme(store.get('jsw-theme', matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
 $('#theme').onclick = () => { const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; applyTheme(t); store.set('jsw-theme', t); };
-{ const h = fromHash(); setLang(h && h.lang ? h.lang : lang, h ? h.n : 0); } // ハッシュなし・#latest は最新号
+setUiLang(uiLang).finally(() => { const h = fromHash(); setLang(h && h.lang ? h.lang : lang, h ? h.n : 0); }); // 表示言語を読み込んでから最初の号を開く（ハッシュなし・#latest は最新号）
 }
 </script>
 </body>

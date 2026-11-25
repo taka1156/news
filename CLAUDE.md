@@ -5,6 +5,7 @@
 ## 構成
 
 - `public/index.html` — リーダー本体。HTML・CSS・JS をこの1ファイルに収める。ビルドなし。
+- `public/locales/ja.json`, `public/locales/en.json` — 画面の文言（i18next）。表示言語はブラウザの言語で初期化し、設定で切り替え。
 - `public/og.png`, `public/favicon.svg` — OGP画像とアイコン（ロゴは Instrument Serif の「Weekly Reader」と「W」）。
 - `worker.js` — Cloudflare Worker。静的配信と `/proxy?url=…`（記事ページの中継、許可ホストのみ）。
 - `wrangler.jsonc` — Workers 設定。本番は `https://news.taka1156.site/`（独自ドメイン。旧 `news.tomo05061.workers.dev`）。
@@ -31,6 +32,8 @@
 - `worker.js` を変えたときは、ユーザーに再デプロイ（`npx wrangler deploy`）が必要と伝える。
 - 外部サイトはこの作業環境から取れない。UIの確認は check-ui、記事の切り出しの確認は debug-parse で行う。推測で「動く」と言わない。
 - 外部ページの文字列は必ずエスケープして描画する（`esc()` / `textContent`）。
+- **画面の文言は `public/locales/ja.json` と `en.json` の両方に追加する。** HTML は `data-i18n` / `data-i18n-aria` / `data-i18n-title` / `data-i18n-ph`、JS は `t('key')`。直書きしない。
+- 外部ライブラリは cdnjs（Cloudflare）からバージョン固定で読み込む（i18next 23.16.8、Driver.js 1.3.1）。npm・ビルドは未導入（将来ビルド方式へ移行予定）。
 
 ## スキル
 

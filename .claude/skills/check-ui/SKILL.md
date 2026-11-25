@@ -13,13 +13,15 @@ description: Weekly Reader（public/index.html）の画面を、仮のページ�
    ```sh
    python3 .claude/skills/check-ui/scripts/check_ui.py --out /tmp/wr-check
    ```
-   - 一部だけ: `--kinds twir --widths 360 --themes dark`
+   - 一部だけ: `--kinds twir --widths 360 --themes dark --locales en`
+   - 既定で表示言語 ja / en の両方を確認する（24通り）。i18next は外から取れないので、`/tmp/wr-vendor/i18next.min.js` があればそれを使う（`npm pack i18next@23.16.8` して `package/dist/umd/i18next.min.js` を置く）。無くても代わりの仕組みで文言は出る。
 2. 出力の `[NG]` 行を直す。チェック内容：
    - スクリプトエラー
    - ヘッダー／フッターの横はみ出し（360px で全ボタンが収まること）
    - 記事0件・フォールバック表示（＝読み込み処理が壊れた）
    - 縦にはみ出すページ（2件以上入っているのに画面に収まらない）
    - 日付が出ていない
+   - 翻訳されていないキー（`nav.next` など）がそのまま表示されている、html の lang が表示言語と違う
 3. `/tmp/wr-check/sheet.png` を Read で見て、崩れがないか目でも確認する。
 4. 結果をユーザーに伝えるときは「仮のページで確認した」と明記する。本物のページでの動作は保証しない。
 

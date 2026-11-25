@@ -1,0 +1,97 @@
+{
+  "loading": "Loading…",
+  "header": {
+    "chooseLang": "Choose a newsletter",
+    "settings": "Settings"
+  },
+  "settings": {
+    "theme": "Light / Dark",
+    "themeAria": "Toggle light / dark",
+    "uiLang": "Display language",
+    "jump": "Go to issue",
+    "jumpPh": "Issue no.",
+    "latest": "Latest",
+    "speed": "Autoplay speed",
+    "slow": "Slow",
+    "normal": "Normal",
+    "fast": "Fast",
+    "version": "Version",
+    "keys": "Press ? for a tour. Keys: Space play / ← → section / [ ] issue. Hold a card to pause."
+  },
+  "nav": {
+    "label": "Controls",
+    "sections": "Sections",
+    "prev": "Older issue",
+    "back": "Previous section",
+    "play": "Autoplay",
+    "fwd": "Next section",
+    "next": "Newer issue",
+    "credits": "Credits",
+    "help": "How to use"
+  },
+  "state": {
+    "loadingIssue": "Loading {{what}}…",
+    "latestIssue": "the latest issue",
+    "notPublished": "#{{n}} hasn't been published yet — you're up to date.",
+    "isLatest": "#{{n}} is the latest issue"
+  },
+  "err": {
+    "openOnWorker": "Open this on the Worker (articles can't be fetched from a local file)",
+    "noProxy": "The Worker's /proxy was not found",
+    "empty": "Empty response",
+    "timeout": "Timed out",
+    "offline": "Can't connect",
+    "noIndex": "Couldn't load the list of issues",
+    "noLatestNum": "Couldn't read the latest issue number",
+    "noArticles": "No articles found (the page layout may have changed)"
+  },
+  "fb": {
+    "failed": "Couldn't load this issue",
+    "showing": "Showing the original page",
+    "open": "Open in a new tab",
+    "retry": "Retry",
+    "embed": "Show here",
+    "unembed": "Stop embedding",
+    "frame": "Original page"
+  },
+  "card": {
+    "top": "Top",
+    "link": "Link ↗"
+  },
+  "tour": {
+    "loadFail": "Couldn't load the tour",
+    "next": "Next",
+    "prev": "Back",
+    "done": "Done",
+    "deck": { "title": "Articles", "desc": "Swipe left or right (or use ← →) to turn pages." },
+    "bars": { "title": "Progress", "desc": "Where you are in this issue. Tap a line to jump to that page." },
+    "lang": { "title": "Newsletter, issue and date", "desc": "Tap to switch between JS / Go / Py / Rs / Rb." },
+    "prev2": { "title": "Change issue", "desc": "« goes to an older issue, » to a newer one." },
+    "back": { "title": "Change page", "desc": "‹ › move to the previous or next page." },
+    "play": { "title": "Autoplay", "desc": "Turns pages automatically based on length and moves on at the end of the issue. Hold an article to pause." },
+    "credits": { "title": "Credits", "desc": "Publishers, licences and links to each original issue — and how to contact us." },
+    "settings": { "title": "Settings", "desc": "Go to an issue, jump to the latest, autoplay speed, light / dark and display language." }
+  },
+  "credits": {
+    "title": "Credits",
+    "close": "Close",
+    "current": "Current issue",
+    "notLoaded": "Nothing loaded yet.",
+    "openOriginal": "Open the original issue ↗",
+    "about": "About this site",
+    "aboutText": "Weekly Reader is an unofficial reader that presents the technical newsletters below in an easy-to-read format. It is not affiliated with any of the publishers. All content belongs to its publishers and to the authors of the linked articles.",
+    "newsletters": "Newsletters",
+    "publisher": "Published by {{pub}}",
+    "site": "Website",
+    "archive": "Archive",
+    "rss": "RSS",
+    "license": "Licence: ",
+    "rustCommunity": "This Week in Rust (Rust community)",
+    "fonts": "Fonts and libraries",
+    "listSep": ", ",
+    "contact": "Contact",
+    "contactBefore": "To request removal or corrections, please ",
+    "contactLink": "open an issue on GitHub",
+    "contactAfter": "."
+  }
+}

@@ -22,7 +22,8 @@ description: Weekly Reader に新しいニュースレター（言語）を追�
 - [ ] `:root[data-lang=xx]{--acc:var(--c-xx)}`
 - [ ] `fromHash` の正規表現 `#(js|go|py|rs|rb|xx)`
 - [ ] `<meta name="description">` と `og:description` にニュースレター名
-- [ ] ツアーの文言「JS / Go / … を切り替えられます」
+- [ ] ツアーの文言「JS / Go / … を切り替えられます」：`public/locales/ja.json` と `en.json` の `tour.lang.desc` の両方
+- [ ] 出典パネル：`CREDITS` に発行元・アーカイブ・RSS・ライセンスを追加（文言が要るなら両方の JSON に）
 - [ ] 新しい形式なら `parse()` に分岐を追加
 
 `worker.js`

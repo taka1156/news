@@ -1,0 +1,97 @@
+{
+  "loading": "読み込み中…",
+  "header": {
+    "chooseLang": "ニュースレターを選ぶ",
+    "settings": "設定"
+  },
+  "settings": {
+    "theme": "ライト / ダーク",
+    "themeAria": "ライト / ダークを切り替え",
+    "uiLang": "表示言語",
+    "jump": "号へ移動",
+    "jumpPh": "号数で移動",
+    "latest": "最新",
+    "speed": "自動再生の速さ",
+    "slow": "ゆっくり",
+    "normal": "ふつう",
+    "fast": "はやい",
+    "version": "バージョン",
+    "keys": "？ボタンで使い方ツアー。キー操作：Space 再生／← → セクション／[ ] 号。カードを押している間は一時停止。"
+  },
+  "nav": {
+    "label": "操作",
+    "sections": "セクション",
+    "prev": "前の号",
+    "back": "前のセクション",
+    "play": "自動再生",
+    "fwd": "次のセクション",
+    "next": "次の号",
+    "credits": "出典",
+    "help": "使い方"
+  },
+  "state": {
+    "loadingIssue": "{{what}} を読み込み中…",
+    "latestIssue": "最新号",
+    "notPublished": "#{{n}} はまだ公開されていません（最新号まで読み終わりました）。",
+    "isLatest": "#{{n}} が最新号です"
+  },
+  "err": {
+    "openOnWorker": "Worker 上で開いてください（ファイルを直接開くと記事を取れません）",
+    "noProxy": "Worker の /proxy が見つかりません",
+    "empty": "空のレスポンス",
+    "timeout": "タイムアウト",
+    "offline": "接続できません",
+    "noIndex": "号の一覧を取得できませんでした",
+    "noLatestNum": "最新号の番号を読み取れませんでした",
+    "noArticles": "記事を見つけられませんでした（ページ構造が変わった可能性）"
+  },
+  "fb": {
+    "failed": "取得できませんでした",
+    "showing": "元のページを表示中",
+    "open": "新しいタブで開く",
+    "retry": "再試行",
+    "embed": "ここに表示",
+    "unembed": "埋め込みをやめる",
+    "frame": "元のページ"
+  },
+  "card": {
+    "top": "トップ",
+    "link": "リンク ↗"
+  },
+  "tour": {
+    "loadFail": "ツアーを読み込めませんでした",
+    "next": "次へ",
+    "prev": "戻る",
+    "done": "閉じる",
+    "deck": { "title": "記事", "desc": "左右にスワイプ（または ← →）でページをめくります。" },
+    "bars": { "title": "進み具合", "desc": "この号のどこを読んでいるか。線を押すとそのページへ飛びます。" },
+    "lang": { "title": "ニュースレター・号・日付", "desc": "押すと JS / Go / Py / Rs / Rb を切り替えられます。" },
+    "prev2": { "title": "号を移動", "desc": "« で1つ古い号、» で1つ新しい号へ。" },
+    "back": { "title": "ページを移動", "desc": "‹ › で前後のページへ。" },
+    "play": { "title": "自動再生", "desc": "文字量に合わせて自動でめくり、号の最後で次の号へ進みます。記事を押している間は一時停止。" },
+    "credits": { "title": "出典", "desc": "各ニュースレターの発行元・ライセンス・元の号へのリンク。掲載についての連絡先もここにあります。" },
+    "settings": { "title": "設定", "desc": "号数で移動、最新号、自動再生の速さ、ライト / ダーク、表示言語の切り替えなど。" }
+  },
+  "credits": {
+    "title": "出典",
+    "close": "閉じる",
+    "current": "今読んでいる号",
+    "notLoaded": "まだ読み込まれていません。",
+    "openOriginal": "元の号を開く ↗",
+    "about": "このサイトについて",
+    "aboutText": "Weekly Reader は、以下の技術ニュースレターを読みやすく表示する非公式のリーダーです。各発行元とは関係ありません。掲載内容の権利は各発行元と、紹介されている記事の著者にあります。",
+    "newsletters": "ニュースレター",
+    "publisher": "発行：{{pub}}",
+    "site": "サイト",
+    "archive": "アーカイブ",
+    "rss": "RSS",
+    "license": "ライセンス：",
+    "rustCommunity": "This Week in Rust（Rust コミュニティ）",
+    "fonts": "フォントとライブラリ",
+    "listSep": "、",
+    "contact": "連絡先",
+    "contactBefore": "掲載の停止・修正などのご連絡は、",
+    "contactLink": "GitHub の Issue",
+    "contactAfter": "からお願いします。"
+  }
+}

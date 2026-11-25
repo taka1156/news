@@ -47,6 +47,7 @@ def main():
     ap.add_argument("--kinds", default=",".join(KINDS))
     ap.add_argument("--widths", default="360,390")
     ap.add_argument("--themes", default="light,dark")
+    ap.add_argument("--locales", default="ja,en", help="表示言語（public/locales/*.json）")
     a = ap.parse_args()
     out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
 
@@ -55,10 +56,9 @@ def main():
     problems, shots, report = [], [], []
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        for kind in a.kinds.split(","):
-            for w in map(int, a.widths.split(",")):
-                for theme in a.themes.split(","):
-                    tag = f"{kind}-{w}-{theme}"
+        combos = [(k, w, th, lc) for lc in a.locales.split(",") for k in a.kinds.split(",") for w in map(int, a.widths.split(",")) for th in a.themes.split(",")]
+        for kind, w, theme, loc in combos:
+                    tag = f"{kind}-{w}-{theme}-{loc}"
                     page = browser.new_page(viewport={"width": w, "height": 760}, color_scheme=theme)
                     errors = []
                     page.on("pageerror", lambda e, errors=errors: errors.append(str(e)))
@@ -73,13 +73,17 @@ def main():
                             path = u[len(ORIGIN) + 1:].split("?")[0].split("#")[0] or "index.html"
                             f = (REPO / "public" / path)
                             if f.is_file():
-                                ctype = {"html": "text/html; charset=utf-8", "png": "image/png", "svg": "image/svg+xml"}.get(f.suffix[1:], "application/octet-stream")
+                                ctype = {"html": "text/html; charset=utf-8", "png": "image/png", "svg": "image/svg+xml", "json": "application/json"}.get(f.suffix[1:], "application/octet-stream")
                                 return r.fulfill(status=200, body=f.read_bytes(), headers={"content-type": ctype})
                             return r.fulfill(status=404, body="not found")
+                        if u.startswith("https://cdnjs.cloudflare.com/ajax/libs/i18next/"):  # 外に出られないので、あれば手元の i18next を返す
+                            local = pathlib.Path("/tmp/wr-vendor/i18next.min.js")
+                            if local.is_file():
+                                return r.fulfill(status=200, body=local.read_bytes(), headers={"content-type": "application/javascript"})
                         return r.abort()  # フォントや画像など外部は読み込まない
 
                     page.route("**/*", route)
-                    page.add_init_script("try{localStorage.clear()}catch(e){}")
+                    page.add_init_script("try{localStorage.clear();localStorage.setItem('jsw-ui',JSON.stringify('%s'))}catch(e){}" % loc)
                     page.goto(ORIGIN + "/" + KINDS[kind])
                     page.wait_for_timeout(1200)
 
@@ -92,6 +96,8 @@ def main():
                         pages: pages.length, items: document.querySelectorAll('.it').length,
                         tallPages: pages.filter(p => p.scrollHeight > p.clientHeight + 1 && p.querySelectorAll('.it').length > 1).length,
                         date: (q('#date') || {}).textContent || '',
+                        rawKeys: [...document.querySelectorAll('body *')].filter(e => !e.children.length && /^(header|settings|nav|state|err|fb|card|tour|credits)[.][A-Za-z0-9.]+$/.test(e.textContent.trim())).map(e => e.textContent.trim()).slice(0, 5),
+                        htmlLang: document.documentElement.lang,
                         fallback: !!q('.fbcard, .fbbar'),
                         sections: [...new Set(pages.map(p => (p.querySelector('h2') || {}).firstChild?.textContent || ''))]
                       };
@@ -108,6 +114,8 @@ def main():
                     if not st["items"]: issues.append("記事が0件")
                     if st["tallPages"]: issues.append(f"縦にはみ出すページが {st['tallPages']} 枚")
                     if not st["date"]: issues.append("日付が出ていない")
+                    if st["rawKeys"]: issues.append("翻訳されていないキーが表示されている: " + ", ".join(st["rawKeys"]))
+                    if st["htmlLang"] != loc: issues.append(f"html lang が {st['htmlLang']}（期待 {loc}）")
                     report.append({"case": tag, **st, "issues": issues})
                     problems += [f"{tag}: {i}" for i in issues]
         browser.close()
