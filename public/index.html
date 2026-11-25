@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="JavaScript Weekly・Go Weekly・PyCoder's Weekly・This Week in Rust を、セクションごとにめくって読めるリーダー。">
+<meta name="description" content="JavaScript Weekly・Go Weekly・PyCoder's Weekly・This Week in Rust・Ruby Weekly を、セクションごとにめくって読めるリーダー。">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Weekly Reader">
 <meta property="og:title" content="Weekly Reader">
-<meta property="og:description" content="JavaScript Weekly・Go Weekly・PyCoder's Weekly・This Week in Rust を、セクションごとにめくって読めるリーダー。">
+<meta property="og:description" content="JavaScript Weekly・Go Weekly・PyCoder's Weekly・This Week in Rust・Ruby Weekly を、セクションごとにめくって読めるリーダー。">
 <meta property="og:url" content="https://news.tomo05061.workers.dev/">
 <meta property="og:image" content="https://news.tomo05061.workers.dev/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<meta name="version" content="2026-11-25.13">
+<meta name="version" content="2026-11-25.14">
 <title>Weekly Reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -27,9 +27,9 @@
 :root{color-scheme:light dark;
   --bg:light-dark(#fbfaf7,#131313);--ink:light-dark(#1b1b1b,#ececea);--sub:light-dark(#555,#a9a9a5);--dim:light-dark(#8c8c88,#6f6f6c);
   --line:light-dark(#e6e4de,#262626);--hover:light-dark(#f0eee8,#1d1d1d);
-  --c-js:light-dark(#a88a00,#e8c21a);--c-go:light-dark(#00809e,#2bbbe0);--c-py:light-dark(#2f66c2,#6f9ff0);--c-rs:light-dark(#c4561c,#f08048);--acc:var(--c-js)}
+  --c-js:light-dark(#a88a00,#e8c21a);--c-go:light-dark(#00809e,#2bbbe0);--c-py:light-dark(#2f66c2,#6f9ff0);--c-rs:light-dark(#c4561c,#f08048);--c-rb:light-dark(#b3262b,#ff6b6b);--acc:var(--c-js)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
-:root[data-lang=go]{--acc:var(--c-go)}:root[data-lang=py]{--acc:var(--c-py)}:root[data-lang=rs]{--acc:var(--c-rs)}
+:root[data-lang=go]{--acc:var(--c-go)}:root[data-lang=py]{--acc:var(--c-py)}:root[data-lang=rs]{--acc:var(--c-rs)}:root[data-lang=rb]{--acc:var(--c-rb)}
 *{box-sizing:border-box;min-width:0}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.75 Inter,"Noto Sans JP",system-ui,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
@@ -226,7 +226,7 @@ footer .btn{height:40px}
         <div id="trInfo">翻訳エンジン: 確認中</div>
         <label for="px">CORSプロキシ（{url} に記事URL。改行で複数、上から順に試行）</label>
         <textarea id="px" rows="4"></textarea>
-        <p style="font-size:12px">バージョン 2026-11-25.13</p>
+        <p style="font-size:12px">バージョン 2026-11-25.14</p>
         <p>？ボタンで使い方ツアー。キー操作：Space 再生／← → セクション／[ ] 号／T 翻訳。カードを押している間は一時停止。</p>
       </div>
     </details>
@@ -256,14 +256,15 @@ const LANGS = {
   js: {label:'JavaScript', mono:'JS', name:'JavaScript Weekly', kind:'cooper',   base:'https://javascriptweekly.com', fb:812},
   go: {label:'Go',         mono:'Go', name:'Go Weekly',         kind:'cooper',   base:'https://golangweekly.com',     fb:625},
   py: {label:'Python',     mono:'Py', name:"PyCoder's Weekly",  kind:'pycoders', base:'https://pycoders.com',         fb:764},
-  rs: {label:'Rust',       mono:'Rs', name:'This Week in Rust', kind:'twir',     base:'https://this-week-in-rust.org', fb:678}
+  rs: {label:'Rust',       mono:'Rs', name:'This Week in Rust', kind:'twir',     base:'https://this-week-in-rust.org', fb:678},
+  rb: {label:'Ruby',       mono:'Rb', name:'Ruby Weekly',       kind:'cooper',   base:'https://rubyweekly.com',       fb:780}
 };
 const DEF_PROXIES = ['https://corsproxy.io/?url={url}','https://api.allorigins.win/raw?url={url}','https://api.codetabs.com/v1/proxy?quest={url}'];
 const MONTHS = 'January|February|March|April|May|June|July|August|September|October|November|December';
 let proxies = store.get('jsw-proxies', DEF_PROXIES);
 // Cloudflare Worker などで配信しているときは、同じ場所の /proxy を最優先で使う
 const OWN = /^https?:$/.test(location.protocol) ? location.origin + '/proxy?url={url}' : '';
-const fromHash = () => { const m = location.hash.match(/^#(js|go|py|rs)(?:-(\d+))?$/); return m ? {lang:m[1], n:m[2] ? +m[2] : 0} : null; };
+const fromHash = () => { const m = location.hash.match(/^#(js|go|py|rs|rb)(?:-(\d+))?$/); return m ? {lang:m[1], n:m[2] ? +m[2] : 0} : null; };
 let lang = fromHash()?.lang || store.get('jsw-lang', 'js');
 if (!LANGS[lang]) lang = 'js';
 let issue = 0, data = null, cur = 0, translating = store.get('jsw-tr', false), translator = null, engine = null;
@@ -720,7 +721,7 @@ async function startTour(){
   const steps = [
     {element:'#deck', popover:{title:'記事', description:'左右にスワイプ（または ← →）でページをめくります。'}},
     {element:'#bars', popover:{title:'進み具合', description:'この号のどこを読んでいるか。線を押すとそのページへ飛びます。'}},
-    {element:'.lsel', popover:{title:'言語・号・日付', description:'押すと JS / Go / Py / Rs を切り替えられます。'}},
+    {element:'.lsel', popover:{title:'言語・号・日付', description:'押すと JS / Go / Py / Rs / Rb を切り替えられます。'}},
     {element:'#prev', popover:{title:'号を移動', description:'« で1つ古い号、» で1つ新しい号へ。'}},
     {element:'#back', popover:{title:'ページを移動', description:'‹ › で前後のページへ。'}},
     {element:'#play', popover:{title:'自動再生', description:'文字量に合わせて自動でめくり、号の最後で次の号へ進みます。記事を押している間は一時停止。'}},

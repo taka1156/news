@@ -1,5 +1,5 @@
 // Weekly Reader 用 Worker：静的ファイル配信 + 記事ページの中継（/proxy?url=...）
-const ALLOW = ['javascriptweekly.com', 'golangweekly.com', 'pycoders.com', 'this-week-in-rust.org'];
+const ALLOW = ['javascriptweekly.com', 'golangweekly.com', 'pycoders.com', 'this-week-in-rust.org', 'rubyweekly.com'];
 
 export default {
   async fetch(req, env) {
