@@ -7,7 +7,7 @@
 - `public/index.html` — リーダー本体。HTML・CSS・JS をこの1ファイルに収める。ビルドなし。
 - `public/og.png`, `public/favicon.svg` — OGP画像とアイコン（ロゴは Instrument Serif の「Weekly Reader」と「W」）。
 - `worker.js` — Cloudflare Worker。静的配信と `/proxy?url=…`（記事ページの中継、許可ホストのみ）。
-- `wrangler.jsonc` — Workers 設定。本番は `https://news.tomo05061.workers.dev/`。
+- `wrangler.jsonc` — Workers 設定。本番は `https://news.taka1156.site/`（独自ドメイン。旧 `news.tomo05061.workers.dev`）。
 - `.claude/skills/` — 作業手順（下記）。
 
 ページの読み込みは `kind` で3系統に分かれる：`cooper`（JS / Go / Ruby、Cooperpress 形式、`/issues/N` と `/latest`）、`pycoders`（PyCoder's Weekly、`/issues/N`）、`twir`（This Week in Rust、URLに日付が入るので過去号一覧から号数→URLの表を作る）。

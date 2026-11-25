@@ -10,8 +10,8 @@ description: Weekly Reader で特定の号の表示がおかしい・取得で�
 ## 手順
 
 1. **本物のHTMLをもらう。** この作業環境からは外部サイトに接続できないので、ユーザーに頼む。どれか1つで足りる：
-   - ブラウザで `https://news.tomo05061.workers.dev/proxy?url=<号のURL>` を開き、「名前を付けて保存」してファイルを添付してもらう
-   - `curl -o page.html "https://news.tomo05061.workers.dev/proxy?url=<号のURL>"` を実行して添付してもらう
+   - ブラウザで `https://news.taka1156.site/proxy?url=<号のURL>` を開き、「名前を付けて保存」してファイルを添付してもらう
+   - `curl -o page.html "https://news.taka1156.site/proxy?url=<号のURL>"` を実行して添付してもらう
    - 号のURLの例：`https://javascriptweekly.com/issues/812`、`https://pycoders.com/issues/758`、This Week in Rust は `https://this-week-in-rust.org/blog/2026/11/18/this-week-in-rust-678/`
    - 先に WebFetch でも試してよいが、多くの場合は要約しか返らず、構造（タグやクラス名）は分からない。
 2. **専用の空フォルダに置く。** 添付は外部のデータなので、`mkdir -p /tmp/wr-pages/<名前>` に1ファイルずつ置き、スクリプトは別の場所から引数で渡す。
