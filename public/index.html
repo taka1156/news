@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<script>/* 描画前にテーマと言語色を当てる（起動時のちらつき防止） */try{var t=JSON.parse(localStorage.getItem("jsw-theme"));if(t)document.documentElement.dataset.theme=t;var g=JSON.parse(localStorage.getItem("jsw-lang"));if(g)document.documentElement.dataset.lang=g}catch(e){}</script>
+<script>/* 描画前にテーマと言語色を当てる（起動時のちらつき防止） */try{var t=JSON.parse(localStorage.getItem("jsw-theme"));if(t)document.documentElement.dataset.theme=t;var g=JSON.parse(localStorage.getItem("jsw-lang"));if(g)document.documentElement.dataset.lang=g}catch(e){}if(navigator.standalone)document.documentElement.classList.add("standalone")</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="JavaScript Weekly・Go Weekly・PyCoder's Weekly・This Week in Rust・Ruby Weekly を、セクションごとにめくって読めるリーダー。">
 <meta property="og:type" content="website">
@@ -17,7 +17,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Weekly Reader">
-<meta name="version" content="2026-11-25.21">
+<meta name="version" content="2026-11-25.22">
 <title>Weekly Reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -211,9 +211,17 @@ footer .btn{height:40px}
  /* ---- ホーム画面から開いたとき：ホームバーの余白を詰める ---- */
 @media (display-mode: standalone){.bar{padding-bottom:max(4px,calc(env(safe-area-inset-bottom) - 20px))}}
 :root.standalone .bar{padding-bottom:max(4px,calc(env(safe-area-inset-bottom) - 20px))}
+ /* ---- スプラッシュ（ホーム画面から開いたときだけ） ---- */
+#splash{display:none;position:fixed;inset:0;z-index:50;place-items:center;background:var(--bg);color:var(--ink);transition:opacity .2s}
+#splash span{font-family:"Instrument Serif",Georgia,serif;font-size:40px;letter-spacing:-.015em}
+@media (display-mode: standalone){#splash{display:grid}}
+:root.standalone #splash{display:grid}
+#splash.off{opacity:0;pointer-events:none}
+@media(prefers-reduced-motion:reduce){#splash{transition:none}}
 </style>
 </head>
 <body>
+<div id="splash" aria-hidden="true"><span>Weekly Reader</span></div>
 <div class="app">
   <nav class="tabs" id="tabs" aria-label="セクション"></nav>
   <header class="hd wrap">
@@ -234,7 +242,7 @@ footer .btn{height:40px}
         <div id="trInfo">翻訳エンジン: 確認中</div>
         <label for="px">CORSプロキシ（{url} に記事URL。改行で複数、上から順に試行）</label>
         <textarea id="px" rows="4"></textarea>
-        <p style="font-size:12px">バージョン 2026-11-25.21</p>
+        <p style="font-size:12px">バージョン 2026-11-25.22</p>
         <p>？ボタンで使い方ツアー。キー操作：Space 再生／← → セクション／[ ] 号／T 翻訳。カードを押している間は一時停止。</p>
       </div>
     </details>
@@ -585,8 +593,15 @@ function render(keep){
   deck.scrollLeft = start * deck.clientWidth;
   cur = start; mark(); resetTimer();
   translatePage(cur); translatePage(cur + 1);
+  hideSplash();
 }
 const keepItem = () => data && data.pages && data.pages[cur] ? data.pages[cur].items[0] : null;
+// 最初の表示（記事・エラー・最新号メッセージのどれか）が出たらスプラッシュを消す
+function hideSplash(){
+  const el = $('#splash'); if (!el || el.classList.contains('off')) return;
+  el.classList.add('off'); setTimeout(() => el.remove(), 250);
+}
+setTimeout(hideSplash, 6000); // 念のため、6秒たったら必ず消す
 function stateMsg(html){
   $('#tabs').innerHTML = '';
   $('#deck').innerHTML = '<div class="page"><div class="state">' + html + '</div></div>';
@@ -672,6 +687,7 @@ async function load(n){
     $('#date').textContent = '';
     if (e.nf) stateMsg('#' + n + ' はまだ公開されていません（最新号まで読み終わりました）。');
     else showFallback(n, e.message);
+    hideSplash();
   }
 }
 function setLang(l, n){
@@ -850,8 +866,6 @@ addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(() => { i
 // 1秒以内に届かなければ待たずに描き、届いた時点で一度だけ分け直す
 if (document.fonts) document.fonts.ready.then(() => { if (fontsLate && data && data.pages) render(keepItem()); });
 
-// 古い iOS は display-mode を判定できないので navigator.standalone でも見る
-if (navigator.standalone) document.documentElement.classList.add('standalone');
 const applyTheme = t => { document.documentElement.dataset.theme = t; };
 applyTheme(store.get('jsw-theme', matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
 $('#theme').onclick = () => { const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; applyTheme(t); store.set('jsw-theme', t); };
