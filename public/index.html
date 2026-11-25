@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
+<script>/* 描画前にテーマと言語色を当てる（起動時のちらつき防止） */try{var t=JSON.parse(localStorage.getItem("jsw-theme"));if(t)document.documentElement.dataset.theme=t;var g=JSON.parse(localStorage.getItem("jsw-lang"));if(g)document.documentElement.dataset.lang=g}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="JavaScript Weekly・Go Weekly・PyCoder's Weekly・This Week in Rust・Ruby Weekly を、セクションごとにめくって読めるリーダー。">
 <meta property="og:type" content="website">
@@ -16,7 +17,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Weekly Reader">
-<meta name="version" content="2026-11-25.20">
+<meta name="version" content="2026-11-25.21">
 <title>Weekly Reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -233,7 +234,7 @@ footer .btn{height:40px}
         <div id="trInfo">翻訳エンジン: 確認中</div>
         <label for="px">CORSプロキシ（{url} に記事URL。改行で複数、上から順に試行）</label>
         <textarea id="px" rows="4"></textarea>
-        <p style="font-size:12px">バージョン 2026-11-25.20</p>
+        <p style="font-size:12px">バージョン 2026-11-25.21</p>
         <p>？ボタンで使い方ツアー。キー操作：Space 再生／← → セクション／[ ] 号／T 翻訳。カードを押している間は一時停止。</p>
       </div>
     </details>
@@ -616,6 +617,8 @@ function setHead(){
 
 /* ---------- 号の読み込み ---------- */
 let loadId = 0;
+let fontsLate = false;
+const fontsOk = document.fonts ? Promise.race([document.fonts.ready, new Promise(ok => setTimeout(() => { fontsLate = true; ok(); }, 1000))]) : Promise.resolve();
 async function load(n){
   const id = ++loadId, L = LANGS[lang], viaLatest = !n;
   const prev = data && issue ? {issue, data, cur, lang} : null; // 新しい号が無かったときに戻すため
@@ -650,7 +653,10 @@ async function load(n){
     store.set('jsw-last-' + lang, n);
     { const known = store.get('jsw-latest-' + lang, 0); if (viaLatest || (known && n > known)) store.set('jsw-latest-' + lang, n); }
     setHead();
-    data = parsed; render();
+    data = parsed;
+    await fontsOk; // フォントが揃ってからページを分ける（分け直しによるずれを防ぐ）
+    if (id !== loadId) return;
+    render();
   }catch(e){
     if (id !== loadId) return;
     setPlaying(false);
@@ -841,7 +847,8 @@ addEventListener('hashchange', () => {
 });
 let rsT;
 addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(() => { if (data && data.pages) render(keepItem()); }, 250); });
-if (document.fonts) document.fonts.ready.then(() => { if (data && data.pages) render(keepItem()); });
+// 1秒以内に届かなければ待たずに描き、届いた時点で一度だけ分け直す
+if (document.fonts) document.fonts.ready.then(() => { if (fontsLate && data && data.pages) render(keepItem()); });
 
 // 古い iOS は display-mode を判定できないので navigator.standalone でも見る
 if (navigator.standalone) document.documentElement.classList.add('standalone');
