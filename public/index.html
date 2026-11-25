@@ -17,7 +17,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Weekly Reader">
-<meta name="version" content="2026-11-25.27">
+<meta name="version" content="2026-11-25.28">
 <title>Weekly Reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -204,6 +204,7 @@ footer .btn{height:40px}
 .bar .btn.ic{width:42px;min-width:42px;height:38px}
 .bar .btn.play{width:40px;height:40px;margin:0 6px}
 .bar #help{position:absolute;right:max(10px,env(safe-area-inset-right))}
+.bar #credits{position:absolute;left:max(10px,env(safe-area-inset-left))}
 .bar{position:relative;gap:6px;padding-block:3px calc(3px + env(safe-area-inset-bottom))}
 @media(max-width:440px){.bar{gap:4px}.bar .btn.ic{width:40px;min-width:40px}}
 @media(max-width:400px){.lsel #num{display:inline}#date::before{content:"·"}#date{margin-left:0}}
@@ -217,10 +218,30 @@ footer .btn{height:40px}
 @media (display-mode: standalone){#splash{display:grid}}
 :root.standalone #splash{display:grid}
 #splash.off{opacity:0;pointer-events:none}
+ /* ---- 出典パネル ---- */
+.sheet{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;background:var(--bg);color:var(--ink);padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.sheet[hidden]{display:none}
+.sheet-hd{display:flex;align-items:center;justify-content:space-between;padding-block:6px;border-bottom:1px solid var(--line)}
+.sheet-hd h2{margin:0;font-size:17px;font-weight:700}
+.sheet-bd{flex:1;overflow-y:auto;padding-block:8px 32px;max-width:760px;width:100%;margin:0 auto;font-size:14px;line-height:1.7;color:var(--sub)}
+.sheet-bd h3{margin:22px 0 6px;font-size:13px;font-weight:600;color:var(--dim)}
+.sheet-bd p{margin:6px 0}
+.sheet-bd a{color:var(--ink);text-underline-offset:3px}
+.cr{padding:12px 0;border-bottom:1px solid var(--line)}
+.cr:last-child{border-bottom:0}
+.cr b{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:15px}
+.cr b::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--lc);flex:none}
+.cr .lk{display:flex;flex-wrap:wrap;gap:2px 14px;margin-top:2px}
+.cr .lic{margin-top:2px;font-size:13px;color:var(--dim)}
+.now{padding:12px 14px;border:1px solid var(--line);border-radius:10px;margin-top:10px}
 </style>
 </head>
 <body>
 <div id="splash" aria-hidden="true" class="notranslate" translate="no"><span>Weekly Reader</span></div>
+<div id="cred" class="sheet notranslate" translate="no" role="dialog" aria-modal="true" aria-labelledby="credTitle" hidden>
+  <div class="sheet-hd wrap"><h2 id="credTitle">出典</h2><button class="btn ic" id="credClose" aria-label="閉じる"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="sheet-bd wrap" id="credBody"></div>
+</div>
 <div class="app">
   <nav class="tabs" id="tabs" aria-label="セクション"></nav>
   <header class="hd wrap notranslate" translate="no">
@@ -236,7 +257,7 @@ footer .btn{height:40px}
         <div class="row"><input id="jump" inputmode="numeric" placeholder="号数で移動"><button class="btn" id="latest">最新</button></div>
         <label>自動再生の速さ</label>
         <div class="seg" id="spd"><button data-v="0">ゆっくり</button><button data-v="1">ふつう</button><button data-v="2">はやい</button></div>
-        <p style="font-size:12px">バージョン 2026-11-25.27</p>
+        <p style="font-size:12px">バージョン 2026-11-25.28</p>
         <p>？ボタンで使い方ツアー。キー操作：Space 再生／← → セクション／[ ] 号。カードを押している間は一時停止。</p>
       </div>
     </details>
@@ -251,6 +272,7 @@ footer .btn{height:40px}
     <button class="btn ic" id="fwd" aria-label="次のセクション" title="次のセクション →"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
     <button class="btn ic" id="next" aria-label="次の号" title="次の号 ]"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l7 7-7 7M12 5l7 7-7 7"/></svg></button>
     <span class="sp"></span>
+    <button class="btn ic" id="credits" aria-label="出典" title="出典"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7h6"/></svg></button>
     <button class="btn ic" id="help" aria-label="使い方" title="使い方"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></svg></button>
   </nav>
 </div>
@@ -702,11 +724,47 @@ async function startTour(){
     {element:'#prev', popover:{title:'号を移動', description:'« で1つ古い号、» で1つ新しい号へ。'}},
     {element:'#back', popover:{title:'ページを移動', description:'‹ › で前後のページへ。'}},
     {element:'#play', popover:{title:'自動再生', description:'文字量に合わせて自動でめくり、号の最後で次の号へ進みます。記事を押している間は一時停止。'}},
+    {element:'#credits', popover:{title:'出典', description:'各ニュースレターの発行元・ライセンス・元の号へのリンク。掲載についての連絡先もここにあります。'}},
     {element:'#setbtn', popover:{title:'設定', description:'号数で移動、最新号、自動再生の速さ、ライト / ダークの切り替えなど。'}}
   ].filter(st => { const el = document.querySelector(st.element); return el && el.offsetParent !== null; });
   driver({showProgress:true, progressText:'{{current}} / {{total}}', nextBtnText:'次へ', prevBtnText:'戻る', doneBtnText:'閉じる', popoverClass:'wr-tour', steps}).drive();
 }
 $('#help').onclick = startTour;
+
+/* ---------- 出典パネル ---------- */
+const COOPER = {pub:'Cooper Press Ltd', lic:'© Cooper Press Ltd'};
+const CREDITS = {
+  js: {...COOPER, archive:'/issues', rss:'/rss'},
+  go: {...COOPER, archive:'/issues', rss:'/rss'},
+  rb: {...COOPER, archive:'/issues', rss:'/rss'},
+  py: {pub:"PyCoder's Weekly", lic:"© PyCoder's Weekly", archive:'/issues', rss:'/feed'},
+  rs: {pub:'This Week in Rust（Rust コミュニティ）', lic:'CC BY-SA', licUrl:'https://github.com/rust-lang/this-week-in-rust', archive:'/blog/archives/index.html', rss:'/rss.xml'}
+};
+const ISSUES_URL = 'https://github.com/taka1156/news/issues/new';
+const A = (href, text) => '<a href="' + esc(href) + '" target="_blank" rel="noopener">' + esc(text) + '</a>';
+function openCredits(){
+  closeMenus(); setPlaying(false);
+  const L = LANGS[lang], now = issue ? '<div class="now">' + esc(L.name) + ' #' + issue + (data && data.date ? '（' + esc(fmtDate(data.date)) + '）' : '') + '<br>' + A(originalUrl(issue), '元の号を開く ↗') + '</div>' : '';
+  const order = ['js', 'go', 'rb', 'py', 'rs'].filter(k => LANGS[k]);
+  $('#credBody').innerHTML =
+    '<h3>今読んでいる号</h3>' + (now || '<p>まだ読み込まれていません。</p>') +
+    '<h3>このサイトについて</h3><p>Weekly Reader は、以下の技術ニュースレターを読みやすく表示する非公式のリーダーです。各発行元とは関係ありません。掲載内容の権利は各発行元と、紹介されている記事の著者にあります。</p>' +
+    '<h3>ニュースレター</h3>' + order.map(k => {
+      const v = LANGS[k], c = CREDITS[k];
+      return '<div class="cr" style="--lc:var(--c-' + k + ')"><b>' + esc(v.name) + '</b>' +
+        '<div>発行：' + esc(c.pub) + '</div>' +
+        '<div class="lk">' + A(v.base + '/', 'サイト') + A(v.base + c.archive, 'アーカイブ') + A(v.base + c.rss, 'RSS') + '</div>' +
+        '<div class="lic">' + (c.licUrl ? 'ライセンス：' + A(c.licUrl, c.lic) : esc(c.lic)) + '</div></div>';
+    }).join('') +
+    '<h3>フォントとライブラリ</h3><p>' + A('https://fonts.google.com/specimen/Instrument+Serif', 'Instrument Serif') + '、' + A('https://fonts.google.com/specimen/Inter', 'Inter') + '、' + A('https://fonts.google.com/noto/specimen/Noto+Sans+JP', 'Noto Sans JP') + '（' + A('https://openfontlicense.org/', 'SIL Open Font License') + '）<br>' + A('https://github.com/kamranahmedse/driver.js', 'Driver.js') + '（MIT License）</p>' +
+    '<h3>連絡先</h3><p>掲載の停止・修正などのご連絡は、' + A(ISSUES_URL, 'GitHub の Issue') + 'からお願いします。</p>';
+  $('#cred').hidden = false;
+  $('#credClose').focus();
+}
+function closeCredits(){ if ($('#cred').hidden) return; $('#cred').hidden = true; $('#credits').focus(); }
+$('#credits').onclick = openCredits;
+$('#credClose').onclick = closeCredits;
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCredits(); });
 
 /* ---------- 自動再生 ---------- */
 let playing = false, hold = false, elapsed = 0, dur = 0, lastT = 0, spd = store.get('jsw-spd', 1);
@@ -726,7 +784,7 @@ function advance(){
 function tick(t){
   requestAnimationFrame(tick);
   const dt = Math.min(t - lastT, 100); lastT = t;
-  if (!playing || hold || document.hidden || !data || !data.pages || document.querySelector('details[open]')) return;
+  if (!playing || hold || document.hidden || !data || !data.pages || document.querySelector('details[open]') || !$('#cred').hidden) return;
   elapsed += dt;
   const b = $('#bars').children[cur]; if (b) b.firstChild.style.transform = 'scaleX(' + Math.min(1, elapsed / dur) + ')';
   if (elapsed >= dur) advance();
@@ -769,7 +827,7 @@ $('#next').onclick = () => issue && load(issue + 1);
 $('#jump').addEventListener('keydown', e => { if (e.key === 'Enter'){ const v = parseInt(e.target.value); if (v > 0) load(v); } });
 try{ localStorage.removeItem('jsw-proxies'); }catch(e){} // 以前の設定の名残を消す
 document.addEventListener('keydown', e => {
-  if (e.target.matches('input,textarea')) return;
+  if (e.target.matches('input,textarea') || !$('#cred').hidden) return;
   if (e.key === 'ArrowRight'){ e.preventDefault(); go(cur + 1); }
   else if (e.key === 'ArrowLeft'){ e.preventDefault(); go(cur - 1); }
   else if (e.key === ']' && issue) load(issue + 1);
