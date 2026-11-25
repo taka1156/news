@@ -16,7 +16,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Weekly Reader">
-<meta name="version" content="2026-11-25.19">
+<meta name="version" content="2026-11-25.20">
 <title>Weekly Reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -105,6 +105,8 @@ footer{display:flex;align-items:center;justify-content:center;gap:10px;padding-b
 .btn.play .pa,.btn.play[aria-pressed=true] .pl{display:none}.btn.play[aria-pressed=true] .pa{display:block}
 .btn.play[aria-pressed=true]{background:var(--acc);color:#fff}
 details{position:relative}
+/* 閉じているときは中身を必ず隠す（ブラウザ任せにしない） */
+details:not([open])>:not(summary){display:none!important}
 summary{list-style:none}summary::-webkit-details-marker{display:none}
 .set{position:absolute;right:0;top:46px;z-index:5;width:min(320px,88vw);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:16px;font-size:13px;color:var(--sub);box-shadow:0 12px 32px rgba(0,0,0,.12)}
 .set label{display:block;margin:14px 0 6px;color:var(--ink);font-weight:600}
@@ -231,7 +233,7 @@ footer .btn{height:40px}
         <div id="trInfo">翻訳エンジン: 確認中</div>
         <label for="px">CORSプロキシ（{url} に記事URL。改行で複数、上から順に試行）</label>
         <textarea id="px" rows="4"></textarea>
-        <p style="font-size:12px">バージョン 2026-11-25.19</p>
+        <p style="font-size:12px">バージョン 2026-11-25.20</p>
         <p>？ボタンで使い方ツアー。キー操作：Space 再生／← → セクション／[ ] 号／T 翻訳。カードを押している間は一時停止。</p>
       </div>
     </details>
@@ -793,6 +795,7 @@ document.addEventListener('pointerdown', e => closeMenus(e.target), true);
 document.addEventListener('visibilitychange', () => { if (document.hidden) closeMenus(); });
 addEventListener('pagehide', () => closeMenus());
 addEventListener('pageshow', () => closeMenus());
+closeMenus(); // 読み込み直後にも閉じる（ブラウザが前の状態を復元しても開かないように）
 $('#latest').onclick = () => load(0);
 let st;
 $('#deck').addEventListener('scroll', e => {
