@@ -17,7 +17,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Weekly Reader">
-<meta name="version" content="2026-11-25.22">
+<meta name="version" content="2026-11-25.23">
 <title>Weekly Reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -212,7 +212,7 @@ footer .btn{height:40px}
 @media (display-mode: standalone){.bar{padding-bottom:max(4px,calc(env(safe-area-inset-bottom) - 20px))}}
 :root.standalone .bar{padding-bottom:max(4px,calc(env(safe-area-inset-bottom) - 20px))}
  /* ---- スプラッシュ（ホーム画面から開いたときだけ） ---- */
-#splash{display:none;position:fixed;inset:0;z-index:50;place-items:center;background:var(--bg);color:var(--ink);transition:opacity .2s}
+#splash{display:none;position:fixed;inset:0;z-index:50;place-items:center;background:var(--bg);color:var(--ink);transition:opacity .4s ease}
 #splash span{font-family:"Instrument Serif",Georgia,serif;font-size:40px;letter-spacing:-.015em}
 @media (display-mode: standalone){#splash{display:grid}}
 :root.standalone #splash{display:grid}
@@ -242,7 +242,7 @@ footer .btn{height:40px}
         <div id="trInfo">翻訳エンジン: 確認中</div>
         <label for="px">CORSプロキシ（{url} に記事URL。改行で複数、上から順に試行）</label>
         <textarea id="px" rows="4"></textarea>
-        <p style="font-size:12px">バージョン 2026-11-25.22</p>
+        <p style="font-size:12px">バージョン 2026-11-25.23</p>
         <p>？ボタンで使い方ツアー。キー操作：Space 再生／← → セクション／[ ] 号／T 翻訳。カードを押している間は一時停止。</p>
       </div>
     </details>
@@ -597,9 +597,13 @@ function render(keep){
 }
 const keepItem = () => data && data.pages && data.pages[cur] ? data.pages[cur].items[0] : null;
 // 最初の表示（記事・エラー・最新号メッセージのどれか）が出たらスプラッシュを消す
+// 速く読み込めても最低 0.8 秒は見せる（一瞬だけ出て消えると、それ自体がちらつきになる）
+const SPLASH_MIN = 800, splashStart = performance.now();
 function hideSplash(){
-  const el = $('#splash'); if (!el || el.classList.contains('off')) return;
-  el.classList.add('off'); setTimeout(() => el.remove(), 250);
+  const el = $('#splash'); if (!el || el.classList.contains('off') || el.dataset.wait) return;
+  const left = SPLASH_MIN - (performance.now() - splashStart);
+  if (left > 0){ el.dataset.wait = '1'; setTimeout(() => { delete el.dataset.wait; hideSplash(); }, left); return; }
+  el.classList.add('off'); setTimeout(() => el.remove(), 450);
 }
 setTimeout(hideSplash, 6000); // 念のため、6秒たったら必ず消す
 function stateMsg(html){
