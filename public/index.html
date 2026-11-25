@@ -17,7 +17,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Weekly Reader">
-<meta name="version" content="2026-11-25.26">
+<meta name="version" content="2026-11-25.27">
 <title>Weekly Reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -220,10 +220,10 @@ footer .btn{height:40px}
 </style>
 </head>
 <body>
-<div id="splash" aria-hidden="true"><span>Weekly Reader</span></div>
+<div id="splash" aria-hidden="true" class="notranslate" translate="no"><span>Weekly Reader</span></div>
 <div class="app">
   <nav class="tabs" id="tabs" aria-label="セクション"></nav>
-  <header class="hd wrap">
+  <header class="hd wrap notranslate" translate="no">
     <span class="logo" aria-label="Weekly Reader">Weekly Reader</span>
     <span class="sp"></span>
     <details class="lp"><summary class="btn lsel" aria-label="言語を選ぶ"><span id="lmono">JS</span><span id="num">#—</span><time id="date"></time><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></summary><div class="lmenu" id="langs" role="group" aria-label="言語"></div></details>
@@ -236,14 +236,14 @@ footer .btn{height:40px}
         <div class="row"><input id="jump" inputmode="numeric" placeholder="号数で移動"><button class="btn" id="latest">最新</button></div>
         <label>自動再生の速さ</label>
         <div class="seg" id="spd"><button data-v="0">ゆっくり</button><button data-v="1">ふつう</button><button data-v="2">はやい</button></div>
-        <p style="font-size:12px">バージョン 2026-11-25.26</p>
+        <p style="font-size:12px">バージョン 2026-11-25.27</p>
         <p>？ボタンで使い方ツアー。キー操作：Space 再生／← → セクション／[ ] 号。カードを押している間は一時停止。</p>
       </div>
     </details>
   </header>
-  <div class="prog wrap"><div class="bars" id="bars"></div><span id="pos">–</span></div>
+  <div class="prog wrap notranslate" translate="no"><div class="bars" id="bars"></div><span id="pos">–</span></div>
   <main class="deck" id="deck"><div class="page"><div class="state">読み込み中…</div></div></main>
-  <nav class="bar wrap" aria-label="操作">
+  <nav class="bar wrap notranslate" translate="no" aria-label="操作">
     <span class="sp"></span>
     <button class="btn ic" id="prev" aria-label="前の号" title="前の号 ["><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5l-7 7 7 7M19 5l-7 7 7 7"/></svg></button>
     <button class="btn ic" id="back" aria-label="前のセクション" title="前のセクション ←"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
@@ -474,7 +474,7 @@ function card(it){
   const link = it.title ? '<a class="t" href="' + esc(it.href) + '" target="_blank" rel="noopener" data-src="' + esc(it.title) + '">' + esc(it.title) + '</a>' : '';
   const desc = it.desc ? '<p data-src="' + esc(it.desc) + '">' + esc(it.desc) + '</p>' : '';
   const more = !it.title && it.href ? '<a class="more" href="' + esc(it.href) + '" target="_blank" rel="noopener">リンク ↗</a>' : '';
-  const meta = (it.sp || it.author || more) ? '<div class="meta">' + (it.sp ? '<span class="tag">Sponsor</span>' : '') + (it.author ? '<span>' + esc(it.author) + '</span>' : '') + more + '</div>' : '';
+  const meta = (it.sp || it.author || more) ? '<div class="meta">' + (it.sp ? '<span class="tag notranslate" translate="no">Sponsor</span>' : '') + (it.author ? '<span>' + esc(it.author) + '</span>' : '') + more + '</div>' : '';
   const img = it.img ? '<img class="th" src="' + esc(it.img) + '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">' : '';
   return '<article class="it' + (it.img ? ' has-img' : '') + '">' + img + link + desc + meta + '</article>';
 }
@@ -496,7 +496,7 @@ function render(keep){
     first[si] = pages.length;
     let pg, box, items;
     const open = () => {
-      pg = document.createElement('section'); pg.className = 'page';
+      pg = document.createElement('section'); pg.className = 'page'; pg.lang = 'en'; // 記事は英語（ブラウザの翻訳が英語として扱う）
       pg.innerHTML = '<div><h2>' + esc(x.name) + '<small></small><span>' + x.items.length + '</span></h2></div>';
       deck.append(pg); box = pg.firstChild; items = [];
       pages.push({si, name:x.name, total:x.items.length, items, el:pg});
@@ -542,7 +542,7 @@ function hideSplash(){
 setTimeout(hideSplash, 6000); // 念のため、6秒たったら必ず消す
 function stateMsg(html){
   $('#tabs').innerHTML = '';
-  $('#deck').innerHTML = '<div class="page"><div class="state">' + html + '</div></div>';
+  $('#deck').innerHTML = '<div class="page"><div class="state notranslate" translate="no">' + html + '</div></div>';
   $('#pos').textContent = '–';
   $('#bars').innerHTML = '';
 }
@@ -657,8 +657,8 @@ function showFallback(n, msg){
   $('#tabs').innerHTML = ''; $('#bars').innerHTML = ''; $('#pos').textContent = '–';
   const embed = store.get('jsw-embed-' + lang, false);
   $('#deck').innerHTML = '<div class="page fb">' + (embed
-    ? '<div class="fbbar"><span title="' + esc(msg) + '">元のページを表示中</span>' + BTN_OPEN + BTN_RETRY + '<button class="btn sm" id="fbhide" aria-label="埋め込みをやめる" title="埋め込みをやめる">×</button></div><iframe id="fbframe" title="元のページ" referrerpolicy="no-referrer"></iframe>'
-    : '<div class="fbcard"><span title="' + esc(msg) + '">取得できませんでした<small>' + esc(msg.split('\n')[0]) + '</small></span>' + BTN_OPEN + '<button class="btn sm" id="fbembed" aria-label="ここに表示" title="ここに表示"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/></svg></button>' + BTN_RETRY + '</div>') + '</div>';
+    ? '<div class="fbbar notranslate" translate="no"><span title="' + esc(msg) + '">元のページを表示中</span>' + BTN_OPEN + BTN_RETRY + '<button class="btn sm" id="fbhide" aria-label="埋め込みをやめる" title="埋め込みをやめる">×</button></div><iframe id="fbframe" title="元のページ" referrerpolicy="no-referrer"></iframe>'
+    : '<div class="fbcard notranslate" translate="no"><span title="' + esc(msg) + '">取得できませんでした<small>' + esc(msg.split('\n')[0]) + '</small></span>' + BTN_OPEN + '<button class="btn sm" id="fbembed" aria-label="ここに表示" title="ここに表示"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/></svg></button>' + BTN_RETRY + '</div>') + '</div>';
   const em = $('#fbembed'); if (em) em.onclick = () => { store.set('jsw-embed-' + lang, true); showFallback(n, fbMsg); };
   const hd = $('#fbhide'); if (hd) hd.onclick = () => { store.set('jsw-embed-' + lang, false); showFallback(n, fbMsg); };
   $('#retry').onclick = () => load(n);
@@ -672,7 +672,7 @@ function refreshFallback(){
 let toastT;
 function toast(msg){
   let t = $('#toast');
-  if (!t){ t = document.createElement('div'); t.id = 'toast'; t.setAttribute('role', 'status'); document.body.append(t); }
+  if (!t){ t = document.createElement('div'); t.id = 'toast'; t.setAttribute('role', 'status'); t.setAttribute('translate', 'no'); t.className = 'notranslate'; document.body.append(t); }
   t.textContent = msg; t.classList.add('on');
   clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2400);
 }
