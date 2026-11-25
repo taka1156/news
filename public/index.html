@@ -16,7 +16,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Weekly Reader">
-<meta name="version" content="2026-11-25.16">
+<meta name="version" content="2026-11-25.17">
 <title>Weekly Reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -231,7 +231,7 @@ footer .btn{height:40px}
         <div id="trInfo">翻訳エンジン: 確認中</div>
         <label for="px">CORSプロキシ（{url} に記事URL。改行で複数、上から順に試行）</label>
         <textarea id="px" rows="4"></textarea>
-        <p style="font-size:12px">バージョン 2026-11-25.16</p>
+        <p style="font-size:12px">バージョン 2026-11-25.17</p>
         <p>？ボタンで使い方ツアー。キー操作：Space 再生／← → セクション／[ ] 号／T 翻訳。カードを押している間は一時停止。</p>
       </div>
     </details>
@@ -269,8 +269,13 @@ const MONTHS = 'January|February|March|April|May|June|July|August|September|Octo
 let proxies = store.get('jsw-proxies', DEF_PROXIES);
 // Cloudflare Worker などで配信しているときは、同じ場所の /proxy を最優先で使う
 const OWN = /^https?:$/.test(location.protocol) ? location.origin + '/proxy?url={url}' : '';
-const fromHash = () => { const m = location.hash.match(/^#(js|go|py|rs|rb)(?:-(\d+))?$/); return m ? {lang:m[1], n:m[2] ? +m[2] : 0} : null; };
-let lang = fromHash()?.lang || store.get('jsw-lang', 'js');
+// #latest … 最後に使った言語の最新号 ／ #rb-latest … その言語の最新号 ／ #rb-810 … その号（n:0 は最新号の意味）
+const fromHash = () => {
+  if (location.hash === '#latest') return {lang: null, n: 0};
+  const m = location.hash.match(/^#(js|go|py|rs|rb)(?:-(\d+|latest))?$/);
+  return m ? {lang: m[1], n: m[2] && m[2] !== 'latest' ? +m[2] : 0} : null;
+};
+let lang = (fromHash() || {}).lang || store.get('jsw-lang', 'js');
 if (!LANGS[lang]) lang = 'js';
 let issue = 0, data = null, cur = 0, translating = store.get('jsw-tr', false), translator = null, engine = null;
 const trCache = store.get('jsw-trcache', {});
@@ -600,7 +605,9 @@ function go(i){
   d.scrollTo({left: i * d.clientWidth, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
 }
 function setHead(){
-  const h = '#' + lang + '-' + issue;
+  // 最新号を表示している間は #latest（ホーム画面に置いても毎回最新号が開く）
+  const known = store.get('jsw-latest-' + lang, 0);
+  const h = issue && known && issue >= known ? '#latest' : '#' + lang + '-' + issue;
   if (issue && location.hash !== h) history.replaceState(null, '', h);
   $('#num').textContent = issue ? '#' + issue : '#—';
 }
@@ -608,7 +615,7 @@ function setHead(){
 /* ---------- 号の読み込み ---------- */
 let loadId = 0;
 async function load(n){
-  const id = ++loadId, L = LANGS[lang];
+  const id = ++loadId, L = LANGS[lang], viaLatest = !n;
   const prev = data && issue ? {issue, data, cur, lang} : null; // 新しい号が無かったときに戻すため
   data = null;
   $('#jump').value = '';
@@ -639,7 +646,8 @@ async function load(n){
     if (id !== loadId) return;
     issue = n; setHead();
     store.set('jsw-last-' + lang, n);
-    if (n > store.get('jsw-latest-' + lang, 0)) store.set('jsw-latest-' + lang, n);
+    { const known = store.get('jsw-latest-' + lang, 0); if (viaLatest || (known && n > known)) store.set('jsw-latest-' + lang, n); }
+    setHead();
     data = parsed; render();
   }catch(e){
     if (id !== loadId) return;
@@ -667,7 +675,7 @@ function setLang(l, n){
   document.title = LANGS[l].name + ' Reader';
   document.querySelectorAll('.lang').forEach(b => b.setAttribute('aria-pressed', b.dataset.l === l));
   issue = 0;
-  load(n || store.get('jsw-last-' + l, 0));
+  load(n === undefined ? store.get('jsw-last-' + l, 0) : n); // 言語メニューからは最後に読んだ号、URL指定なら n（0 は最新号）
 }
 
 /* ---------- フォールバック：元のページをそのまま表示 ---------- */
@@ -816,7 +824,12 @@ document.addEventListener('keydown', e => {
   else if (e.key === 't' || e.key === 'T') $('#tr').click();
   else if (e.key === ' '){ e.preventDefault(); setPlaying(!playing); }
 });
-addEventListener('hashchange', () => { const h = fromHash(); if (!h) return; if (h.lang !== lang) setLang(h.lang, h.n); else if (h.n && h.n !== issue) load(h.n); });
+addEventListener('hashchange', () => {
+  const h = fromHash(); if (!h) return;
+  const l = h.lang || lang;
+  if (l !== lang) setLang(l, h.n);
+  else if (h.n ? h.n !== issue : location.hash !== '#latest' || issue < store.get('jsw-latest-' + lang, 0)) load(h.n);
+});
 let rsT;
 addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(() => { if (data && data.pages) render(keepItem()); }, 250); });
 if (document.fonts) document.fonts.ready.then(() => { if (data && data.pages) render(keepItem()); });
@@ -828,7 +841,7 @@ applyTheme(store.get('jsw-theme', matchMedia('(prefers-color-scheme: dark)').mat
 $('#theme').onclick = () => { const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; applyTheme(t); store.set('jsw-theme', t); };
 $('#tr').setAttribute('aria-pressed', translating);
 initEngine();
-setLang(lang, fromHash()?.n);
+{ const h = fromHash(); setLang(h && h.lang ? h.lang : lang, h ? h.n : 0); } // ハッシュなし・#latest は最新号
 }
 </script>
 </body>
