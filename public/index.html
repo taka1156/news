@@ -14,7 +14,9 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<meta name="version" content="2026-11-25.14">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Weekly Reader">
+<meta name="version" content="2026-11-25.15">
 <title>Weekly Reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -226,7 +228,7 @@ footer .btn{height:40px}
         <div id="trInfo">翻訳エンジン: 確認中</div>
         <label for="px">CORSプロキシ（{url} に記事URL。改行で複数、上から順に試行）</label>
         <textarea id="px" rows="4"></textarea>
-        <p style="font-size:12px">バージョン 2026-11-25.14</p>
+        <p style="font-size:12px">バージョン 2026-11-25.15</p>
         <p>？ボタンで使い方ツアー。キー操作：Space 再生／← → セクション／[ ] 号／T 翻訳。カードを押している間は一時停止。</p>
       </div>
     </details>
@@ -443,7 +445,10 @@ function cooperItem(el){
   const lines = linesOf(el.querySelector('.desc') || el).filter(l => !/^sponsor$/i.test(l));
   if (!author && lines.length > 1){ const last = lines[lines.length - 1]; if (last.length < 70 && !/[.!?:]$/.test(last) && !last.includes(title)) author = lines.pop().replace(/\s*sponsor\s*$/i, ''); }
   let desc = lines.join(' ');
-  desc = desc.replace(title, '').replace(author, '').replace(/^[\s—–\-:|]+/, '').replace(/\bsponsor\b\s*$/i, '').trim();
+  // タイトルが文頭なら外し、文中のリンク（IN BRIEF など）なら文をそのまま残す
+  if (author) desc = desc.replace(author, '');
+  desc = (desc.trim().startsWith(title) ? desc.trim().slice(title.length) : desc).replace(/^[\s—–\-:|]+/, '').replace(/\bsponsor\b\s*$/i, '').replace(/\s{2,}/g, ' ').trim();
+  if (desc === title) desc = '';
   const sp = /sponsor/i.test(el.innerHTML.match(/class="[^"]*"/g)?.join(' ') || '') || /\bsponsor\b/i.test(el.textContent.slice(-40));
   return {title, href: a.getAttribute('href'), desc, author, sp, img: pickImg(el)};
 }
@@ -465,6 +470,9 @@ function pyItem(el){
   }
   return {title, href: a.getAttribute('href'), desc: desc.join(' '), author: src, sp, img: pickImg(el)};
 }
+
+// 開発用：スキルのスクリプトから読み込み処理を呼べるようにする
+window.WR_DEBUG = {parse, LANGS, get data(){ return data; }};
 
 /* ---------- 翻訳 ---------- */
 async function initEngine(){
