@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Weekly Reader の画面チェック。
 
-外部サイトの代わりに fixtures/ の仮ページを返してリーダーを開き、
+仮のサイト（http://wr.test）で public/ を配信し、/proxy では外部サイトの代わりに fixtures/ の仮ページを返してリーダーを開き、
 幅 360/390px・ライト/ダークで撮影し、次を自動で確かめる：
   - スクリプトのエラーが出ていない
   - ヘッダーとフッターのボタンが横にはみ出していない
@@ -21,6 +21,7 @@ SKILL = HERE.parent
 REPO = SKILL.parents[2]
 FIX = SKILL / "fixtures"
 INDEX = REPO / "public" / "index.html"
+ORIGIN = "http://wr.test"  # Worker と同じく /proxy を持つ仮のサイト
 
 # kind → (開くハッシュ, 仮ページを選ぶ関数)
 KINDS = {
@@ -64,19 +65,22 @@ def main():
 
                     def route(r):
                         u = r.request.url
-                        if u.startswith("file:"):
-                            return r.continue_()
-                        if "codetabs" in u:  # 3つのプロキシのうち1つだけ成功させる
-                            target = unquote(u.split("quest=", 1)[-1])
+                        if u.startswith(ORIGIN + "/proxy?url="):  # Worker の /proxy の代わり
+                            target = unquote(u.split("url=", 1)[1])
                             return r.fulfill(status=200, body=fixture_for(target),
-                                             headers={"access-control-allow-origin": "*", "content-type": "text/html"})
-                        if "corsproxy" in u or "allorigins" in u:
-                            return r.fulfill(status=403, body="blocked")
+                                             headers={"content-type": "text/html; charset=utf-8", "x-weekly-proxy": "1", "x-final-url": target})
+                        if u.startswith(ORIGIN + "/"):  # 静的ファイル（public/）
+                            path = u[len(ORIGIN) + 1:].split("?")[0].split("#")[0] or "index.html"
+                            f = (REPO / "public" / path)
+                            if f.is_file():
+                                ctype = {"html": "text/html; charset=utf-8", "png": "image/png", "svg": "image/svg+xml"}.get(f.suffix[1:], "application/octet-stream")
+                                return r.fulfill(status=200, body=f.read_bytes(), headers={"content-type": ctype})
+                            return r.fulfill(status=404, body="not found")
                         return r.abort()  # フォントや画像など外部は読み込まない
 
                     page.route("**/*", route)
                     page.add_init_script("try{localStorage.clear()}catch(e){}")
-                    page.goto(INDEX.as_uri() + KINDS[kind])
+                    page.goto(ORIGIN + "/" + KINDS[kind])
                     page.wait_for_timeout(1200)
 
                     st = page.evaluate("""() => {

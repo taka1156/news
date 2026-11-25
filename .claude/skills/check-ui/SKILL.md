@@ -5,7 +5,7 @@ description: Weekly Reader（public/index.html）の画面を、仮のページ�
 
 # check-ui
 
-この作業環境からは javascriptweekly.com などの本物のサイトに接続できない。代わりに `fixtures/` の仮ページを返してリーダーを開き、見た目と動作を確かめる。
+この作業環境からは javascriptweekly.com などの本物のサイトに接続できない。仮のサイト `http://wr.test` で `public/` を配信し、Worker の `/proxy` の代わりに `fixtures/` の仮ページを返してリーダーを開き、見た目と動作を確かめる。
 
 ## 手順
 

@@ -17,7 +17,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Weekly Reader">
-<meta name="version" content="2026-11-25.24">
+<meta name="version" content="2026-11-25.25">
 <title>Weekly Reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -239,9 +239,7 @@ footer .btn{height:40px}
         <div class="seg" id="spd"><button data-v="0">ゆっくり</button><button data-v="1">ふつう</button><button data-v="2">はやい</button></div>
         <label>翻訳</label>
         <div id="trInfo">翻訳エンジン: 確認中</div>
-        <label for="px">CORSプロキシ（{url} に記事URL。改行で複数、上から順に試行）</label>
-        <textarea id="px" rows="4"></textarea>
-        <p style="font-size:12px">バージョン 2026-11-25.24</p>
+        <p style="font-size:12px">バージョン 2026-11-25.25</p>
         <p>？ボタンで使い方ツアー。キー操作：Space 再生／← → セクション／[ ] 号／T 翻訳。カードを押している間は一時停止。</p>
       </div>
     </details>
@@ -274,11 +272,7 @@ const LANGS = {
   rs: {label:'Rust',       mono:'Rs', name:'This Week in Rust', kind:'twir',     base:'https://this-week-in-rust.org', fb:678},
   rb: {label:'Ruby',       mono:'Rb', name:'Ruby Weekly',       kind:'cooper',   base:'https://rubyweekly.com',       fb:780}
 };
-const DEF_PROXIES = ['https://corsproxy.io/?url={url}','https://api.allorigins.win/raw?url={url}','https://api.codetabs.com/v1/proxy?quest={url}'];
 const MONTHS = 'January|February|March|April|May|June|July|August|September|October|November|December';
-let proxies = store.get('jsw-proxies', DEF_PROXIES);
-// Cloudflare Worker などで配信しているときは、同じ場所の /proxy を最優先で使う
-const OWN = /^https?:$/.test(location.protocol) ? location.origin + '/proxy?url={url}' : '';
 // #latest … 最後に使った言語の最新号 ／ #rb-latest … その言語の最新号 ／ #rb-810 … その号（n:0 は最新号の意味）
 const fromHash = () => {
   if (location.hash === '#latest') return {lang: null, n: 0};
@@ -292,37 +286,22 @@ const trCache = store.get('jsw-trcache', {});
 
 /* ---------- 取得 ---------- */
 let lastFinal = '';
-// プロキシを並列に試し、最初に成功したものを使う（各15秒でタイムアウト）
+// 記事ページは同じ場所の Worker（/proxy）経由で取る。15秒でタイムアウト
 async function fetchHTML(url){
-  const ctrls = [];
-  const one = async p => {
-    const c = new AbortController(); ctrls.push(c);
-    const to = setTimeout(() => c.abort(), 15000);
-    try{
-      const r = await fetch(p.replace('{url}', encodeURIComponent(url)), {signal: c.signal});
-      // 自前Worker以外のサイトに置いた場合、/proxy 自体が無くて404になるのは「号が無い」扱いにしない
-      if (r.status === 404 && (p !== OWN || r.headers.get('x-weekly-proxy'))) throw Object.assign(new Error('404'), {nf:true});
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      const t = await r.text();
-      if (t.length < 500) throw new Error('空のレスポンス');
-      return {t, final: r.headers.get('x-final-url') || ''};
-    }catch(e){
-      throw e.name === 'AbortError' ? new Error('タイムアウト') : e.nf ? e : new Error(e.message === 'Failed to fetch' ? '接続できません' : e.message);
-    }finally{ clearTimeout(to); }
-  };
-  const list = (OWN ? [OWN] : []).concat(proxies);
-  if (!list.length) throw new Error('プロキシ未設定');
+  if (!/^https?:$/.test(location.protocol)) throw new Error('Worker 上で開いてください（ファイルを直接開くと記事を取れません）');
+  const c = new AbortController(), to = setTimeout(() => c.abort(), 15000);
   try{
-    const res = await Promise.any(list.map(one));
-    ctrls.forEach(c => c.abort());
-    lastFinal = res.final;
-    return res.t;
-  }catch(agg){
-    const errs = agg.errors || [agg];
-    const nf = errs.find(e => e.nf);
-    if (nf) throw nf;
-    throw new Error(errs.map((e, i) => { let h = ''; try{ h = new URL(list[i].replace('{url}', ''), location.href).host; }catch(_){ h = 'proxy' + (i + 1); } return h + ': ' + e.message; }).join('\n'));
-  }
+    const r = await fetch('/proxy?url=' + encodeURIComponent(url), {signal: c.signal});
+    // Worker が無い場所に置いた場合の 404 は「号が無い」扱いにしない
+    if (r.status === 404 && r.headers.get('x-weekly-proxy')) throw Object.assign(new Error('404'), {nf:true});
+    if (!r.ok) throw new Error(r.status === 404 ? 'Worker の /proxy が見つかりません' : 'HTTP ' + r.status);
+    const t = await r.text();
+    if (t.length < 500) throw new Error('空のレスポンス');
+    lastFinal = r.headers.get('x-final-url') || '';
+    return t;
+  }catch(e){
+    throw e.name === 'AbortError' ? new Error('タイムアウト') : e.nf ? e : new Error(e.message === 'Failed to fetch' ? '接続できません' : e.message);
+  }finally{ clearTimeout(to); }
 }
 // This Week in Rust は URL に日付が入るので、号数→URL の対応表を作る
 async function twirIndex(force){
@@ -849,12 +828,7 @@ $('#tr').onclick = () => {
   if (translating){ translatePage(cur); translatePage(cur + 1); } else untranslate();
   refreshFallback();
 };
-$('#px').value = proxies.join('\n');
-$('#px').addEventListener('change', e => {
-  proxies = e.target.value.split('\n').map(s => s.trim()).filter(s => s.includes('{url}'));
-  if (!proxies.length) proxies = DEF_PROXIES;
-  store.set('jsw-proxies', proxies);
-});
+try{ localStorage.removeItem('jsw-proxies'); }catch(e){} // 以前の設定の名残を消す
 document.addEventListener('keydown', e => {
   if (e.target.matches('input,textarea')) return;
   if (e.key === 'ArrowRight'){ e.preventDefault(); go(cur + 1); }
