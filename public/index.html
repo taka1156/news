@@ -16,7 +16,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Weekly Reader">
-<meta name="version" content="2026-11-25.18">
+<meta name="version" content="2026-11-25.19">
 <title>Weekly Reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -231,7 +231,7 @@ footer .btn{height:40px}
         <div id="trInfo">翻訳エンジン: 確認中</div>
         <label for="px">CORSプロキシ（{url} に記事URL。改行で複数、上から順に試行）</label>
         <textarea id="px" rows="4"></textarea>
-        <p style="font-size:12px">バージョン 2026-11-25.18</p>
+        <p style="font-size:12px">バージョン 2026-11-25.19</p>
         <p>？ボタンで使い方ツアー。キー操作：Space 再生／← → セクション／[ ] 号／T 翻訳。カードを押している間は一時停止。</p>
       </div>
     </details>
@@ -789,6 +789,10 @@ $('#langs').addEventListener('click', e => { const b = e.target.closest('.lang')
 // 外側を触ったら閉じる。iOS はボタン以外をタップしても click が document に届かないので pointerdown で見る
 const closeMenus = except => document.querySelectorAll('details[open]').forEach(d => { if (!except || !d.contains(except)) d.open = false; });
 document.addEventListener('pointerdown', e => closeMenus(e.target), true);
+// アプリを離れる／戻るときも閉じる（iOS はページを保存したまま復帰するので、開いた状態が残る）
+document.addEventListener('visibilitychange', () => { if (document.hidden) closeMenus(); });
+addEventListener('pagehide', () => closeMenus());
+addEventListener('pageshow', () => closeMenus());
 $('#latest').onclick = () => load(0);
 let st;
 $('#deck').addEventListener('scroll', e => {
