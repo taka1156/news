@@ -17,7 +17,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Weekly Reader">
-<meta name="version" content="2026-11-25.25">
+<meta name="version" content="2026-11-25.26">
 <title>Weekly Reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -190,7 +190,7 @@ footer .btn{height:40px}
 .driver-popover.wr-tour .driver-popover-arrow-side-bottom{border-bottom-color:var(--bg)}
 .driver-popover.wr-tour .driver-popover-arrow-side-left{border-left-color:var(--bg)}
 .driver-popover.wr-tour .driver-popover-arrow-side-right{border-right-color:var(--bg)}
- /* ---- ヘッダーに言語・翻訳・設定、フッターは送りだけ ---- */
+ /* ---- ヘッダーに言語・設定、フッターは送りだけ ---- */
 .app{grid-template-rows:auto auto 1fr auto}
 .hd{grid-row:1}.prog{grid-row:2}.deck{grid-row:3}.bar{grid-row:4}
 .hd{display:flex;align-items:center;gap:2px;padding-top:calc(2px + env(safe-area-inset-top));padding-bottom:0}
@@ -227,7 +227,6 @@ footer .btn{height:40px}
     <span class="logo" aria-label="Weekly Reader">Weekly Reader</span>
     <span class="sp"></span>
     <details class="lp"><summary class="btn lsel" aria-label="言語を選ぶ"><span id="lmono">JS</span><span id="num">#—</span><time id="date"></time><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></summary><div class="lmenu" id="langs" role="group" aria-label="言語"></div></details>
-    <button class="btn ic" id="tr" aria-pressed="false" aria-label="日本語に翻訳" title="翻訳 (T)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z"/></svg></button>
     <details class="sd">
       <summary class="btn ic" id="setbtn" aria-label="設定"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></summary>
       <div class="set">
@@ -237,10 +236,8 @@ footer .btn{height:40px}
         <div class="row"><input id="jump" inputmode="numeric" placeholder="号数で移動"><button class="btn" id="latest">最新</button></div>
         <label>自動再生の速さ</label>
         <div class="seg" id="spd"><button data-v="0">ゆっくり</button><button data-v="1">ふつう</button><button data-v="2">はやい</button></div>
-        <label>翻訳</label>
-        <div id="trInfo">翻訳エンジン: 確認中</div>
-        <p style="font-size:12px">バージョン 2026-11-25.25</p>
-        <p>？ボタンで使い方ツアー。キー操作：Space 再生／← → セクション／[ ] 号／T 翻訳。カードを押している間は一時停止。</p>
+        <p style="font-size:12px">バージョン 2026-11-25.26</p>
+        <p>？ボタンで使い方ツアー。キー操作：Space 再生／← → セクション／[ ] 号。カードを押している間は一時停止。</p>
       </div>
     </details>
   </header>
@@ -281,8 +278,8 @@ const fromHash = () => {
 };
 let lang = (fromHash() || {}).lang || store.get('jsw-lang', 'js');
 if (!LANGS[lang]) lang = 'js';
-let issue = 0, data = null, cur = 0, translating = store.get('jsw-tr', false), translator = null, engine = null;
-const trCache = store.get('jsw-trcache', {});
+let issue = 0, data = null, cur = 0;
+try{ ['jsw-tr', 'jsw-trcache'].forEach(k => localStorage.removeItem(k)); }catch(e){} // 翻訳機能の名残を消す
 
 /* ---------- 取得 ---------- */
 let lastFinal = '';
@@ -471,52 +468,6 @@ function pyItem(el){
 // 開発用：スキルのスクリプトから読み込み処理を呼べるようにする
 window.WR_DEBUG = {parse, LANGS, get data(){ return data; }};
 
-/* ---------- 翻訳 ---------- */
-async function initEngine(){
-  try{
-    if ('Translator' in self){
-      const av = await Translator.availability({sourceLanguage:'en', targetLanguage:'ja'});
-      if (av !== 'unavailable'){ engine = 'chrome'; $('#trInfo').textContent = '翻訳エンジン: Chrome内蔵 Translator（端末内・無料・APIキー不要）'; return; }
-    }
-  }catch(e){}
-  engine = 'google';
-  $('#trInfo').textContent = '翻訳エンジン: Google翻訳（非公式エンドポイント、送信先は Google）';
-}
-async function tr(text){
-  if (!text) return '';
-  if (trCache[text]) return trCache[text];
-  let out = '';
-  if (engine === 'chrome'){
-    translator = translator || await Translator.create({sourceLanguage:'en', targetLanguage:'ja'});
-    out = await translator.translate(text);
-  } else {
-    const r = await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ja&dt=t&q=' + encodeURIComponent(text));
-    const j = await r.json();
-    out = j[0].map(s => s[0]).join('');
-  }
-  trCache[text] = out;
-  return out;
-}
-let saveT;
-async function translatePage(i){
-  if (!translating || !data || !data.pages[i]) return;
-  const page = $('#deck').children[i];
-  const q = [...page.querySelectorAll('[data-src]:not([data-done])')];
-  const run = async () => { for (let el; el = q.shift();){
-    el.dataset.done = '1';
-    try{
-      const ja = await tr(el.dataset.src);
-      if (!translating){ delete el.dataset.done; continue; }
-      el.innerHTML = '<span class="ja">' + esc(ja) + '</span><span class="en">' + esc(el.dataset.src) + '</span>';
-    }catch(e){ delete el.dataset.done; $('#trInfo').textContent = '翻訳に失敗: ' + e.message; }
-  }};
-  await Promise.all([run(), run(), run(), run()]);
-  clearTimeout(saveT);
-  saveT = setTimeout(() => { const ks = Object.keys(trCache); if (ks.length > 3000) ks.slice(0, ks.length - 3000).forEach(k => delete trCache[k]); store.set('jsw-trcache', trCache); }, 800);
-}
-function untranslate(){
-  document.querySelectorAll('[data-src][data-done]').forEach(el => { el.textContent = el.dataset.src; delete el.dataset.done; });
-}
 
 /* ---------- 描画 ---------- */
 function card(it){
@@ -570,7 +521,6 @@ function render(keep){
   const start = keep ? Math.max(0, data.pages.findIndex(p => p.items.includes(keep))) : 0;
   deck.scrollLeft = start * deck.clientWidth;
   cur = start; mark(); resetTimer();
-  translatePage(cur); translatePage(cur + 1);
   hideSplash();
 }
 const keepItem = () => data && data.pages && data.pages[cur] ? data.pages[cur].items[0] : null;
@@ -698,13 +648,9 @@ function originalUrl(n){
   const path = store.get('jsw-rs-index', {map:{}}).map[n];
   return L.base + (path || (n ? '/blog/archives/index.html' : '/'));
 }
-function viaGoogle(u){
-  const x = new URL(u);
-  return 'https://' + x.host.replace(/-/g, '--').replace(/\./g, '-') + '.translate.goog' + x.pathname + '?_x_tr_sl=en&_x_tr_tl=ja&_x_tr_hl=ja';
-}
-const fbSrc = () => translating ? viaGoogle(fbUrl) : fbUrl;
+const fbSrc = () => fbUrl;
 let fbMsg = '';
-const BTN_OPEN = '<a class="btn sm" id="fbopen" target="_blank" rel="noopener" aria-label="新しいタブで開く" title="新しいタブで開く（翻訳オンなら日本語）"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>';
+const BTN_OPEN = '<a class="btn sm" id="fbopen" target="_blank" rel="noopener" aria-label="新しいタブで開く" title="新しいタブで開く"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>';
 const BTN_RETRY = '<button class="btn sm" id="retry" aria-label="再試行" title="再試行"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>';
 function showFallback(n, msg){
   fbUrl = originalUrl(n); fbMsg = msg;
@@ -756,7 +702,6 @@ async function startTour(){
     {element:'#prev', popover:{title:'号を移動', description:'« で1つ古い号、» で1つ新しい号へ。'}},
     {element:'#back', popover:{title:'ページを移動', description:'‹ › で前後のページへ。'}},
     {element:'#play', popover:{title:'自動再生', description:'文字量に合わせて自動でめくり、号の最後で次の号へ進みます。記事を押している間は一時停止。'}},
-    {element:'#tr', popover:{title:'翻訳', description:'記事を日本語に翻訳します。原文も下に残ります。'}},
     {element:'#setbtn', popover:{title:'設定', description:'号数で移動、最新号、自動再生の速さ、ライト / ダークの切り替えなど。'}}
   ].filter(st => { const el = document.querySelector(st.element); return el && el.offsetParent !== null; });
   driver({showProgress:true, progressText:'{{current}} / {{total}}', nextBtnText:'次へ', prevBtnText:'戻る', doneBtnText:'閉じる', popoverClass:'wr-tour', steps}).drive();
@@ -775,7 +720,7 @@ function paint(){
 function resetTimer(){ elapsed = 0; dur = data && data.pages ? pageDur(cur) : 0; paint(); }
 function setPlaying(v){ playing = v; $('#play').setAttribute('aria-pressed', v); lastT = performance.now(); }
 function advance(){
-  if (cur < data.pages.length - 1){ cur++; mark(); resetTimer(); go(cur); translatePage(cur + 1); }
+  if (cur < data.pages.length - 1){ cur++; mark(); resetTimer(); go(cur); }
   else { elapsed = 0; load(issue + 1); }
 }
 function tick(t){
@@ -812,7 +757,7 @@ $('#deck').addEventListener('scroll', e => {
   clearTimeout(st);
   st = setTimeout(() => {
     const d = e.target, i = Math.round(d.scrollLeft / d.clientWidth);
-    if (data && i !== cur){ closeMenus(); cur = i; mark(); resetTimer(); translatePage(i); translatePage(i + 1); }
+    if (data && i !== cur){ closeMenus(); cur = i; mark(); resetTimer(); }
   }, 80);
 });
 $('#tabs').addEventListener('click', e => { const b = e.target.closest('.tab'); if (b && data) go(data.first[+b.dataset.i]); });
@@ -822,12 +767,6 @@ $('#back').onclick = () => go(cur - 1);
 $('#fwd').onclick = () => go(cur + 1);
 $('#next').onclick = () => issue && load(issue + 1);
 $('#jump').addEventListener('keydown', e => { if (e.key === 'Enter'){ const v = parseInt(e.target.value); if (v > 0) load(v); } });
-$('#tr').onclick = () => {
-  translating = !translating; store.set('jsw-tr', translating);
-  $('#tr').setAttribute('aria-pressed', translating);
-  if (translating){ translatePage(cur); translatePage(cur + 1); } else untranslate();
-  refreshFallback();
-};
 try{ localStorage.removeItem('jsw-proxies'); }catch(e){} // 以前の設定の名残を消す
 document.addEventListener('keydown', e => {
   if (e.target.matches('input,textarea')) return;
@@ -835,7 +774,6 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'ArrowLeft'){ e.preventDefault(); go(cur - 1); }
   else if (e.key === ']' && issue) load(issue + 1);
   else if (e.key === '[' && issue > 1) load(issue - 1);
-  else if (e.key === 't' || e.key === 'T') $('#tr').click();
   else if (e.key === ' '){ e.preventDefault(); setPlaying(!playing); }
 });
 addEventListener('hashchange', () => {
@@ -852,8 +790,6 @@ if (document.fonts) document.fonts.ready.then(() => { if (fontsLate && data && d
 const applyTheme = t => { document.documentElement.dataset.theme = t; };
 applyTheme(store.get('jsw-theme', matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
 $('#theme').onclick = () => { const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; applyTheme(t); store.set('jsw-theme', t); };
-$('#tr').setAttribute('aria-pressed', translating);
-initEngine();
 { const h = fromHash(); setLang(h && h.lang ? h.lang : lang, h ? h.n : 0); } // ハッシュなし・#latest は最新号
 }
 </script>
